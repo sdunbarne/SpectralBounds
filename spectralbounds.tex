@@ -1,0 +1,1892 @@
+%%% -*-LaTeX-*-
+%%% spectralbounds.tex.orig
+%%% Prettyprinted by texpretty lex version 0.02 [21-May-2001]
+%%% on Thu Nov 10 08:34:50 2022
+%%% for Steve Dunbar (sdunbar@family-desktop)
+
+% Check at end of Assumptions; should it be p^n(x,y) \to m(y) ? or
+% m(x)
+% At very last sentence of Assumptions, make references to sections hyperlinks
+% Check out all comments in []
+% Alternate notation for the \( \theta \)-kernel
+
+\documentclass[12pt]{article}
+
+\input{../../../../etc/macros} %\input{../../../../etc/mzlatex_macros}
+\input{../../../../etc/pdf_macros}
+
+\bibliographystyle{plain}
+
+\begin{document}
+
+\myheader \mytitle
+
+\hr
+
+\sectiontitle{Gibbs Sampling, Eigen Decompositions, and Spectral Bounds
+for Markov Chains}
+
+\hr
+
+\usefirefox
+
+\hr
+
+% \visual{Study Tip}{../../../../CommonInformation/Lessons/studytip.png}
+% \section*{Study Tip}
+
+% \hr
+
+\visual{Rating}{../../../../CommonInformation/Lessons/rating.png}
+\section*{Rating} %one of
+% Everyone: contains no mathematics.
+% Student: contains scenes of mild algebra or calculus that may require guidance.
+% Mathematically Mature: may contain mathematics beyond calculus with proofs.
+Mathematicians Only:  prolonged scenes of intense rigor.
+
+\hr
+
+\visual{Section Starter Question}{../../../../CommonInformation/Lessons/question_mark.png}
+\section*{Section Starter Question}
+
+Recall the magical land of Oz where the weather follows a pattern.  If
+it is raining today, then tomorrow has a \( 50\% \) chance of raining
+again, and a \( 25\% \) chance of either having a nice day or a snowy
+day tomorrow.  Similarly if it is snowing, the next day has a \( 50\% \)
+chance of again having snow, and a \( 25\% \) chance of either having a
+nice day, or a rainy day.  Also the land of Oz never has two nice days
+in a row, and equally has rain or snow the day after a nice day.  Recall
+that for \( P^n \), for large values of \( n \), the row vectors
+approach the stationary distribution \( \mathbf{\pi}=(2/5,1/5,2/5) \).
+Starting from the state of rain, find the Euclidean distance of the
+state at day \( n \) from the stationary distribution, using the
+eigenvalues and eigenvectors of the transition probability matrix.
+
+\hr
+
+\visual{Key Concepts}{../../../../CommonInformation/Lessons/keyconcepts.png}
+\section*{Key Concepts}
+
+\begin{enumerate}
+    \item
+        The \defn{systematic scan Gibbs sampler}%
+        for drawing from the distribution \( \Prob{\cdot} \) proceeds as
+        follows.  Starting from \( (x, \theta) \), first, draw \( x' \)
+        from \( f_{\theta}(\cdot) \); second, draw \( \theta' \) from \(
+        \pi(\cdot \given x') \).  The output is \( (x' , \theta') \).
+        This generates a Markov chain \( (x, \theta) \to (x', \theta')
+        \to \dots \) having kernel
+        \[
+            K(x, \theta; x', \theta') = f_{\theta}(x') \cdot f_{\theta'}
+            (x')/m(x')
+        \] with respect to \( \mu(\ddf{x'})\pi(\ddf{\theta}) \).
+    \item
+        The \defn{\( x \)-chain}%
+        is:  first, draw \( \theta' \) with probability \( \pi(\theta'
+        \given x) \); second, \( x' \) with probability \( f_{\theta'}(x')
+        \) (with the abuse of notation that the probability is given by
+        the density function \( f_{\theta'}(x') \)).  The \( x \)-chain
+        has transition kernel
+        \[
+            k(x,x') = \int_{\Theta} \pi(\theta \given x) f_{\theta}(x')
+            \pi(\ddf{\theta}) = \int_{\Theta} \frac{f_{\theta}(x) \cdot
+            f_ {\theta}(x')}{m(x)} \pi(\ddf{\theta}).
+        \]
+    \item
+        The \defn{\( \theta \)-chain}%
+        is:  first draw \( x \) from \( f_{\theta} (x) \) and then \(
+        \theta' \) from \( \pi(\theta' \given x) \).  The \( \theta \)-chain
+        has transition kernel
+        \[
+            k(\theta,\theta') = \int_{\mathcal{X}} f_{\theta}(x) \pi(\theta'
+            \given x) \mu (\ddf{x}) = \int_{\mathcal{X}} \frac{f_{\theta}
+            (x) f_{\theta'}(x)}{m(x)} \mu(\ddf{x}).
+        \]
+    \item
+        Under simple hypotheses common Gibbs sampler Markov chains have
+        polynomial eigenvectors, with explicitly known eigenvalues. This
+        includes the \( x \)-chain, \( \theta \)-chain and the random
+        scan chain.
+    \item
+        An example of the \( x \)-chain for the Poisson/Gamma
+        distributions gives explicit expressions for the eigenvalues and
+        eigenvectors in terms of the orthogonal polynomial system of
+        Meixner polynomials.
+    \item
+        A simple model of population dynamics with immigration is a
+        Markov chain.  The results show the convergence is rapid, only
+        order \( \log_2(x) \) steps are necessary and sufficient for
+        convergence to stationarity.
+\end{enumerate}
+
+\hr
+
+\visual{Vocabulary}{../../../../CommonInformation/Lessons/vocabulary.png}
+\section*{Vocabulary}
+\begin{enumerate}
+    \item
+        The Markov chain is called \defn{reversible} if \( P \)
+        operating on \( L^2(m) \) by \( P[f](x) = \int f(y) P(x,\ddf{y})
+        \) is self-adjoint.
+    \item
+        The \defn{systematic scan Gibbs sampler} for drawing from the
+        distribution \( \Prob{\cdot} \) proceeds as follows.  Starting
+        from \( (x, \theta) \), first, draw \( x' \) from \( f_{\theta}(\cdot)
+        \); second, draw \( \theta' \) from \( \pi(\cdot \given x') \).
+    \item
+        For the joint density \( f(x,\theta) \) the \defn{\( x \)-chain}
+        is the Markov chain created by the process:  From \( x \), draw \(
+        \theta' \), from \( \pi(\theta' \given x) \) and then \( x' \)
+        from \( f_{\theta'}(x') \)
+    \item
+        The \defn{\( \theta \)-chain} is:  first draw \( x \) from \( f_
+        {\theta}(x) \) and then \( \theta' \) from \( \pi(\theta' \given
+        x) \).
+    \item
+        The \defn{random scan chain} proceeds as follows.  From \( (x,
+        \theta) \), pick a coordinate at random equally, and update it
+        from the appropriate conditional distribution.  Then formally,
+        for \( g \in L^2(\mathbb{P}) \)
+        \[
+            \bar{K} g(x,\theta) = \frac{1}{2} \int_{\Theta} g(x,\theta'')
+            \pi(\theta' \given) \pi(\ddf{\theta'}) + \frac{1}{2} \int_{\mathcal
+            {X}} g(x', \theta) f_{\theta}(x') \mu(df{x'}).
+        \]
+    \item
+        The \defn{chi-square distance} between the distribution of the
+        chain started at \( \xi \) after \( \ell \) steps and its
+        stationary measure is
+        \[
+            \chi^2_{\xi}(\ell) = \int \abs{\hat{K}^{\ell}_{\xi}(\xi') -1}^
+            {2} m(\ddf{\xi'})
+            = \int \frac{\abs{K^{\ell}(\ell, \ell') - m(\xi')}^2}{m(\xi')}
+            \tilde{\mu(\ddf{\xi'})}.
+        \]
+\end{enumerate}
+
+\hr
+
+\subsection*{Notation}
+\begin{enumerate}
+    \item
+        \( \mathcal{X} \) -- state space, either finite or infinite
+    \item
+        \( \mu(\ddf{x}) \) -- reference measure on \( \mathcal{X} \),
+    \item
+        \( m(x) \) -- a probability density with respect to \( \mu \),
+    \item
+        \( P(x, \ddf{y}) \) -- for each \( x \), \( P(x, \cdot) \) is a
+        probability measure on \( \mathcal{X} \).
+    \item
+        \( X_0, X_1, X_2, \dots \) -- a Markov chain with starting state
+        \( X_0 = x \)
+    \item
+        \( f,g \) -- square integrable functions with respect to \( m \)
+    \item
+        \( P(x,\ddf{y}) = p(x,y)\mu(\ddf{y}) \) -- density form of the
+        kernel
+    \item
+        \( \lambda_{\nu} \) -- eigenvalues and corresponding
+        eigenvectors \( f_{\nu} \) so that \( Pf_{\nu} = \lambda_{\nu} f_
+        {\nu} \) for \( \nu = 0,1,2, \dots \)
+    \item
+        \( (\mathcal{X}, \mathcal{F}) \) -- measure space for states
+    \item
+        \( \theta \) -- parameter for the distribution
+    \item
+        \( (\Theta, \mathcal{G}) \) -- measure space for priors
+    \item
+        \( \setof{f_{\theta}(x)}{\theta \in \Theta } \) -- family of
+        probability densities on \( \mathcal{X} \) with respect to
+        measure \( \mu(\ddf{x}) \)
+    \item
+        \( A \in \mathcal{F} , B \in \mathcal{G} \) -- arbitrary sets
+    \item
+        \( m(x) = \int_{\Theta} f_{\theta}(x) \pi(\ddf{\theta}) \) --
+        marginal density
+    \item
+        \( \pi(\theta \given x) = f_{\theta}(x)/m(x) \) -- posterior
+        density with respect to \( \pi(\ddf{\theta}) \)
+    \item
+        \( K(x, \theta; x', \theta') \) -- kernel for systematic scan
+        Gibbs sampler starting from \( x \)
+    \item
+        \( \tilde{K}(x, \theta ; x' , \theta') \) -- kernel for
+        systematic scan Gibbs sampler starting from \( \theta \)
+    \item
+        \( k(x,x') \) -- kernel for \( x \)-chain
+    \item
+        \( k(\theta,\theta') \) -- kernel for \( \theta \)-chain
+    \item
+        \( bar{K} g(x,\theta) \) -- action of random scan chain
+    \item
+        \( I_0(z) = \sum\limits_{\nu=0}^{\infty} \frac{1}{(\nu !)^2}\left
+        ( \frac {z}{2} \right)^{2\nu} \) -- modified Bessel function of
+        order \( 0 \)
+    \item
+        \( K(\xi, \xi') \) -- general kernel for a Markov chain
+    \item
+        \( \chi^2_{\xi}(\ell) \) -- \defn{chi-square distance} between
+        the distribution of the chain started at \( \xi \) after \( \ell
+        \) steps and its stationary measure
+
+    \item
+        \( (\mathcal{X}, \mathcal{F}) = (\Naturals, 2^{\Naturals}) \) --
+        the measure space equipped with the counting measure \( \mu(\ddf
+        {x}) \) for the Poisson distribution
+    \item
+        \( \theta \) -- parameter for the Poisson distribution
+    \item
+        \( (\Theta, \mathcal{G}) = ((0,\infty), \mathcal{B}) \) -- the
+        measure space for the Gamma distribution
+    \item
+        \( a \) -- shape parameter for the Gamma distribution
+    \item
+        \( \alpha \) -- scale parameter for the Gamma distribution
+    \item
+        \( \pi(\theta; a, \alpha) = \frac{ \theta^{a-1} \EulerE^{-\theta/\alpha}}
+        {\alpha^a \Gamma(a)} \) -- family of Gamma probability densities
+    \item
+        \( Gamma(a) \) -- Gamma function
+    \item
+        \( (a)_x \) -- the rising Pochhammer symbol, also called the
+        shifted factorial \\
+        item \( {}_2F_1(a,b; c; z) \) -- the regular hypergeometric
+        function
+    \item
+        \( M_j(x; a, \alpha) = {}_2F_1 \left( -j, -x; a; -\alpha \right)
+        \) -- the Meixner polynomials in terms of the regular
+        hypergeometric function
+    \item
+        \( m_j(x; \beta, c) = (\beta)_j \cdot {}_2F_1 \left( -j, -x;
+        \beta; 1 - 1/c \right) \) -- alternate definition of Meixner
+        polynomials with a different normalization
+    \item
+        \( \delta_{jk} \) -- Kronecker delta function
+    \item
+        \( N_{\nu,n} \) -- the random number of offspring of member \(
+        \nu \) of the population at time \( n \)
+    \item
+        \( M_{n+1} \) -- the immigration with the same distribution as \(
+        N_{\nu, n} \)
+\end{enumerate}
+
+\visual{Mathematical Ideas}{../../../../CommonInformation/Lessons/mathematicalideas.png}
+\section*{Mathematical Ideas}
+
+This section closely examines the spectral approach to convergence of
+Markov chains to a stationary distribution.  The spectral approach uses
+eigenfunction decompositions to estimate distance measures and
+inequalities for probability distributions.  The focus is on
+two-component Gibbs samplers, with applications to the Beta/Binomial and
+Poisson/Gamma Gibbs samplers.  These two-component Gibbs samplers lead
+to decompositions in terms of orthogonal polynomials.  Finally, the
+results for the Poisson/Gamma Gibbs samplers leads to a convergence rate
+for a specific Markov chain birth and immigration model.
+
+\subsection*{Notation and Assumptions}
+
+\begin{itemize}
+    \item
+        Let \( \mathcal{X} \) be a state space, either finite or
+        infinite.
+    \item
+        Let \( \mu(\ddf{x}) \) be a reference measure on \( \mathcal{X} \),
+        typically Lebesgue measure or counting measure.
+    \item
+        Let \( m(x) \) be a probability density with respect to \( \mu \),
+        meaning \( m(x) \ge 0 \) and \( \int m(x) \mu(\ddf{x}) = 1 \).
+    \item
+        Let \( P(x, \ddf{y}) \) be a Markov kernel on \( \mathcal{X} \).
+        This means that for each \( x \), \( P(x, \cdot) \) is a
+        probability measure on \( \mathcal{X} \).
+    \item
+        Then \( P \) creates a Markov chain \( X_0, X_1, X_2, \dots \)
+        with starting state \( X_0 = x \) by choosing \( X_1 \) with \(
+        P(x, \cdot) \), choosing \( X_2 \) with \( P(X_{1}, \cdot) \)
+        and so on.
+    \item
+        Recall that the Markov chain is \defn{reversible} if \( P \)
+        operating on \( L^2(m) \) by \( P[f](x) = \int f(y) P (x,\ddf{y})
+        \) is self-adjoint, \( \langle Pf, g \rangle = \langle f,Pg
+        \rangle \).
+    \item
+        Often the Markov kernel has the density form \( P(x,\ddf{y}) = p
+        (x,y) \mu(\ddf{y}) \) and reversibility reduces to \( m(x)p(x,y)
+        = m(y)p (y,x) \) for all \( x,y \).  Reversibility says the
+        Markov chain run forward is the same as the chain run backward,
+        in analogy with the time reversibility of the laws of mechanics.
+        Here \( P \) operates on all of \( L^2(m) \), so reversible
+        Markov kernels are bounded self-adjoint operators.
+    \item
+        Suppose \( P \) has a square integrable kernel, so that \( P \)
+        operating on \( L^2(m) \) becomes \( P[f](x) = \int f(y) p(x,y)
+        \mu(\ddf{y}) \).
+    \item
+        Then \( P \) is compact and there are eigenvalues \( \lambda_{\nu}
+        \) and corresponding eigenvectors \( f_{\nu} \) so that \( Pf_{\nu}
+        = \lambda_{\nu} f_{\nu} \) for \( \nu = 0,1,2, \dots \).
+    \item
+        Under a mild connectedness condition, \( \lambda_0 = 1 \), \( f_0
+        = 1 \) and \( 1 = \lambda_0 > \lambda_1 \ge \lambda_2 \ge \cdots
+        \ge -1 \).
+    \item
+        Then the kernel can be written
+        \[
+            p(x,y) = m(x) \sum\limits_{\nu=0}^{\infty}\lambda_{\nu} f_{\nu}
+            (x)f_{\nu}(y).
+        \] In a specific simple example, for finite state spaces with
+        counting measure, this says the transition probability matrix is
+        symmetric.
+    \item
+        The iterated kernel is
+        \[
+            p^n(x,y) = m(x) \sum\limits_{\lambda=0}^{\infty}\lambda_{\nu}^n
+            f_{\nu}(x)f_{\nu}(y).
+        \] If \( f_{\nu}(x) \) and \( f_{\nu}(y) \) are bounded, then
+        using \( f_0 \equiv 1 \),
+        \[
+            p^n(x,y) \to m(y), \text{ as } n \to \infty.
+        \]
+\end{itemize}
+
+The goal is to provide useful information about the rate of convergence,
+that is, to provide a quantitative bound on how large \( n \) must be to
+have \( \| P^n_x - m \| < \epsilon \).  To use this representation, good
+information on \( \lambda_{i} \) and \( f_i \) must be available.  For
+an example, see the sections on Convergence to Stationary and Fastest
+Mixing.
+
+\subsection*{Two-Component Gibbs Sampling}
+
+Let \( (\mathcal{X}, \mathcal{F}) \) be a measurable space equipped with
+a \( \sigma \)-finite measure \( \mu(\ddf{x}) \) on \( \mathcal{F} \).
+Let \( (\Theta, \mathcal{G}) \) be a measurable space equipped with a
+probability measure \( \pi(\ddf{\theta}) \) on \( \mathcal{G} \).  (Here
+\( \pi(\ddf{\theta}) \) is the prior distribution on the parameter, not
+the stationary distribution.) The measure on the \( (\Theta, \mathcal{G})
+\) space is the \emph{prior distribution}%
+\index{prior distribution}
+or just the \emph{prior} for short.  In many classical situations the
+prior is given by a density \( g(\theta) \) with respect to the Lebesgue
+measure \( \df{\theta} \) so \( \pi(\ddf{\theta}) = g(\theta) \df{\theta}
+\), but there are also examples where the parameter \( \theta \) is
+discrete, which cannot be described with a density.  Thus, it is
+necessary to work with general prior probabilities \( \pi(\ddf {\theta})
+\) throughout.  Let \( \setof{f_{\theta}(x)}{\theta \in \Theta } \) be a
+family of probability densities on \( \mathcal{X} \) with respect to the
+\( \sigma \)-finite measure \( \mu(\ddf{x}) \).  Together these measures
+define a probability measure on \( \mathcal{X} \times \Theta \) via
+\[
+    \Prob{A \times B} = \int_B \int_A f_{\theta}(x) \mu(\ddf{x})\pi(\ddf
+    {\theta}), \quad A \in \mathcal{F} , B \in \mathcal{G}.
+\] The \emph{marginal density}%
+\index{marginal density}
+on \( \mathcal{X} \) is
+\[
+    m(x) = \int_{\Theta} f_{\theta}(x) \pi(\ddf{\theta})
+\] so
+\[
+    \int_{\mathcal{X}} m(x) \mu(\ddf{x} ) = 1.
+\] Assume \( 0 < m(x) < \infty \) for every \( x \in \mathcal{X} \).
+The \emph{posterior density}%
+\index{posterior density}
+with respect to \( \pi(\ddf{\theta}) \) is
+\[
+    \pi(\theta \given x) = f_{\theta}(x)/m(x).
+\]
+
+The probability \( \Prob{\cdot} \) splits with respect to the measure \(
+m(\ddf{x}) \) defined by \( m(\ddf{x}) = m(x) \mu(\ddf{x}) \) in the
+form
+\[
+    \Prob{A \times B} = \int_A \int_{B} \pi(\theta \given x) \pi(\ddf{\theta})
+    m(\ddf{x}), \quad A \in \mathcal{F}, B \in \mathcal{G}.
+\]
+
+The \defn{systematic scan Gibbs sampler}%
+\index{systematic scan Gibbs sampler}
+for drawing from the distribution \( \Prob{\cdot} \) proceeds as
+follows.  Starting from \( (x, \theta) \), first, draw \( x' \) from \(
+f_{\theta}(\cdot) \); second, draw \( \theta' \) from \( \pi(\cdot
+\given x') \).  The output is \( (x' , \theta') \).  This generates a
+Markov chain \( (x, \theta) \to (x', \theta') \to \dots \) having kernel
+\[
+    K(x, \theta; x', \theta') = f_{\theta}(x') \cdot f_{\theta'}(x')/m(x')
+\] with respect to \( \mu(\ddf{x'})\pi(\ddf{\theta}) \).  Note that the
+kernel does not depend on \( x \).
+
+A slight variant exchanges the order of the draws:  Starting from \( (x,
+\theta ) \), first, draw \( \theta' \) from \( \pi(\cdot \given x) \);
+second, draw \( x' \) with density \( f_{\theta'}(\cdot) \).  The output
+is \( (x', \theta' ) \).  This generates a Markov chain \( (x, \theta )
+\to (x', \theta' ) \to \dots \) having kernel
+\[
+    \tilde{K}(x, \theta ; x' , \theta') = \pi( \theta' \given x) \cdot f_
+    {\theta'}(x') = f_{\theta'}(x)/m(x) \cdot f_{\theta'}(x') = f_{\theta'}
+    (x') \cdot f_{\theta'}(x')/m(x)
+\] with respect to \( \mu(\ddf{x'})\pi(\ddf{\theta}) \).  Note that the
+kernel does not depend on \( \theta \).
+
+Under mild conditions these two chains have stationary distribution \(
+\Prob{\cdot} \).  [Why?  How to show?]
+
+The \defn{\( x \)-chain}%
+\index{\(x\)-chain}
+is:  first, draw \( \theta' \) with probability \( \pi(\theta' \given x)
+\); second, \( x' \) with probability \( f_{\theta'}(x') \) (with the
+abuse of notation that the probability is given by the density function \(
+f_{\theta'}(x') \)).  The \( x \)-chain has transition kernel
+\[
+    k(x,x') = \int_{\Theta} \pi(\theta \given x) f_{\theta}(x') \pi(\ddf
+    {\theta}) = \int_{\Theta} \frac{f_{\theta}(x) \cdot f_{\theta}(x')}{m
+    (x)} \pi(\ddf {\theta}).
+\] Note that \( \int_{\mathcal{X}} k(x,x') \mu(\ddf{x'}) = 1 \) so that \(
+k(x,\cdot) \) is a probability density with respect to \( \mu \).  Note
+further that \( m(x) k(x,x') = m(x') k(x',x) \) so that the \( x \)-chain
+has \( m(\ddf{x}) \) as a stationary distribution.  [Check this out.  If
+this checks out symbolically, it is self-adjointness, and reversibility
+which implies a stationary distribution.]
+
+The \defn{\( \theta \)-chain}%
+\index{\( \theta \)-chain}
+is:  first draw \( x \) from \( f_{\theta} (x) \) and then \( \theta' \)
+from \( \pi(\theta' \given x) \).  The \( \theta \)-chain has transition
+kernel
+\[
+    k(\theta,\theta') = \int_{\mathcal{X}} f_{\theta}(x) \pi(\theta'
+    \given x) \mu (\ddf{x}) = \int_{\mathcal{X}} \frac{f_{\theta}(x) f_{\theta'}
+    (x)}{m(x)} \mu(\ddf{x}).
+\] Note \( \int k(\theta,\theta') \pi(\ddf{\theta'}) = 1 \) so that \( k
+(\theta,\theta') \) is a probability density with respect to \( \pi \).
+[Check this out.] Additionally \( k(\theta, \theta') \) has \( \pi(\ddf{\theta})
+\) as reversing measure.  [What is a reversing measure?  Not elsewhere
+mentioned in Diaconis.  Not elsewhere used (?) Maybe omit.]
+
+The \defn{random scan chain}%
+\index{random scan chain}
+proceeds as follows.  From \( (x, \theta) \), pick a coordinate at
+random equally, and update it from the appropriate conditional
+distribution.  Then formally, for \( g \in L^2(\mathbb{P}) \)
+\begin{equation}
+    \bar{K} g(x,\theta) = \frac{1}{2} \int_{\Theta} g(x,\theta') \pi(\theta'
+    \given x) \pi(\ddf{\theta'}) + \frac{1}{2} \int_{\mathcal{X}} g(x',
+    \theta) f_{\theta}(x') \mu(\ddf {x'}).%
+    \label{eq:spectralbounds:randomscan}
+\end{equation}
+Note three things about the random scan chain.
+\begin{enumerate}
+    \item
+        \( \bar{K} \) sends \( L^2(\mathbb{P}) \to L^2(\mathbb{P}) \)
+        and is reversible with respect to \( \mathbb{P} \).  This is a
+        reason for using the random scans.
+    \item
+        The right side of equation~%
+        \ref{eq:spectralbounds:randomscan} is the sum of a function of \(
+        x \) alone and a function of \( \theta \) alone.  Then \( \bar{K}:
+        L^2(\mathbb{P}) \to L^2(m) + L^2(\mathbb{\pi}) \), that is, the
+        range of \( \bar{K} \) is contained in \( L^2(m) + L^2(\mathbb{\pi})
+        \).
+    \item
+        If \( \bar{K} \in (L^2(m) + L^2(\mathbb{\pi}))^{\perp} \), then \(
+        \bar{K} = 0 \), or \( (L^2(m) + L^2(\mathbb{\pi}))^ {\perp}
+        \subseteq
+        \operatorname{Ker}
+        {\bar{K}} \).  In more detail, for \( h \in L^2(\mathbb{P}) \),
+        \[
+            \langle \bar{K}g, h \rangle_{\mathbb{P}} = \int (\bar{K}g)
+            \cdot h \dProb = \int (\bar{K}h) \cdot g \dProb = 0.
+        \] Thus, \( \bar{K} g = 0 \)
+\end{enumerate}
+
+\begin{example}
+    The Poisson/Exponential distributions.  Let \( \mathcal{X} = \set{0,1,2,3,
+    \dots} \), \( \mu(\ddf{x}) \) is counting measure, \( \Theta = (0,\infty)
+    \), \( f_{\theta}(x) = \EulerE^{-\theta}\theta^x/x! \).  Take \( \pi
+    (\ddf{\theta}) = \EulerE^{-\theta} \df{\theta} \).  By the
+    definition of the Gamma integral (see the exercises)
+    \[
+        m(x) = \int\limits_0^{\infty} \frac{\EulerE^{-\theta} \theta^x}{x!}
+        \EulerE^{-\theta} \df{\theta} = \int\limits_0^{\infty} \frac{\EulerE^
+        {-2\theta} \theta^x}{x!} \df{\theta} = \frac{1}{2^{x+1}}.
+    \] The posterior distribution with respect to \( \pi(\ddf{\theta}) \)
+    is \( \pi(\theta \given x) = f_{\theta}(x)/m(x) = 2^{x+1} \EulerE^{-\theta}\theta^x/x!
+    \).  The \( x \)-chain has kernel (see the exercises)
+    \begin{multline*}
+        k(x,x') = \int\limits_0^{\infty}\frac{2^{x+1} \theta^x \EulerE^{-\theta}}
+        {x!} \cdot \frac{\theta^{x'} \EulerE^{-\theta}}{x'!} \cdot
+        \EulerE^{-\theta} \df{\theta} \\
+        = \int\limits_0^{\infty}\frac{2^{x+1} \theta^{x+x'} \EulerE^{-3\theta}}
+        {x!x'!} \df{\theta} = \frac{2^{x+1}}{3^{x+x'+1}} \binom{x+x'}{x},
+        \quad x,x' \in \set{0,1,2,3, \dots}.
+    \end{multline*}
+    The \( \theta \)-chain has kernel
+    \begin{multline*}
+        k(\theta,\theta') = \int_{\mathcal{X}} \frac{f_{\theta}(x) f_{\theta'}
+        (x)}{m(x)}\mu(\ddf{x}) \\
+        = \sum_{x=0}^{\infty} \frac{\EulerE^{-\theta} \theta^x}{x!}
+        \cdot \frac{\EulerE^{-\theta'} (\theta')^x}{x!} \cdot 2^{x+1} =
+        2 \EulerE^{-\theta-\theta'} \sum\limits_{x=0}^ {\infty} \frac {(2\theta
+        \theta')^x}{(x!)^2} = 2 \EulerE^{-\theta-\theta'}I_0(\sqrt{8
+        \theta \theta'})
+    \end{multline*}
+    with respect to \( \pi(\ddf{\theta}) \), where \( I_0 \) is the
+    classical modified Bessel function.  Following Feller~%
+    \cite[Section 2.7, pages 58--61]{feller71}, the series definition of
+    the modified Bessel function of order \( 0 \) is
+    \[
+        I_0(z) = \sum\limits_{\nu=0}^{\infty} \frac{1}{(\nu !)^2}\left(
+        \frac {z}{2} \right)^{2\nu}.
+    \]
+\end{example}
+
+\subsubsection*{Distances and Inequalities}
+
+This subsection recalls some general results to apply to the
+two-component Gibbs sampler chains or the \( x \)-chain and \( \theta \)-chain.
+
+Consider a Markov chain described by its kernel \( K(\xi, \xi') \) with
+respect to a measure \( \tilde{\mu}(\ddf{\xi'} ) \).  For example, for
+the two-component sampler, the Markov chain states would be \( \xi = (x,
+\theta ) \) with respect to the product measure \( \tilde{\mu}(\ddf {\xi}
+) = \mu (\ddf{x})\pi(\ddf{\theta} ) \).  As another example, for the \(
+x \)-chain the Markov chain states would be \( \xi = x \) with respect
+to measure \( \tilde{\mu}(\ddf{\xi} ) = \mu(\ddf{x} ) \).  Suppose
+further that the chain has stationary measure \( m(\ddf{\xi}) = m(\xi )
+\tilde{\mu}(\ddf{\xi}) \) (that is, \( m (\xi) \) is a density for the
+stationary distribution) and write
+\begin{align*}
+    \hat{K}(\xi, \xi') &= K(\xi,\xi')/m(\xi') \\
+    \hat{K}_{\xi}^{\ell}(\xi') &= \hat{K}^{\ell}(\xi, \xi') = K^{\ell}(\xi,\xi')/m
+    (\xi')
+\end{align*}
+for the kernel and iterated kernel of the chain with respect to the
+stationary measure \( m(\ddf{\xi}) \), where the superscript \( \ell \)
+denotes the chain after \( \ell \) steps.
+
+The \defn{chi-square distance} between the distribution of the chain
+started at \( \xi \) after \( \ell \) steps and its stationary measure
+is
+\[
+    \chi^2_{\xi}(\ell) = \int \abs{ \hat{K}^{\ell}_{\xi}(\xi') -1}^ {2}
+    m(\ddf{\xi'}) \\
+    = \int \frac{\abs{K^{\ell}(\xi, \xi') - m(\xi')}^2}{m(\xi')} \tilde{\mu}
+    (\ddf{\xi'}).
+\] Recall the definition of the total variation distance between the
+iterated kernel of the chain \( K^{\ell}(\xi, \xi') \) and the
+stationary distribution \( m(\ddf{\xi}) \)
+\[
+    \| K^{\ell}_{\xi} - m \|_{TV} = \frac{1}{2} \int \abs{ \hat{K}^{\ell}_
+    {\xi}(\xi') -1} m(\ddf{\xi'}) \\
+    = \frac{1}{2} \int \abs{K^{\ell}(\xi, \xi') - m(\xi')} \tilde{\mu}(\ddf
+    {\xi'}).
+\] By Jensen's Inequality the chi-square distance gives an upper bound
+on the total variation distance, namely
+\[
+    4 \| K^{\ell}_{\xi} - m \|_{TV}^2 \le \chi^2_{\xi}(\ell).
+\]
+
+\subsection*{Lemmas on Convergence Rates}
+
+Analysis of the rate of convergence comes from eigenfunction
+decompositions.  A function \( \phi \) such that
+\begin{align*}
+    K[\phi(\xi )] &= \int K(\xi, \xi')\phi(\xi') \tilde{\mu}(\ddf{\xi'})
+    = \lambda\phi (\xi), \\
+    m(\phi) &= \int 1 \cdot \phi(\xi )m(\xi ) \tilde{\mu}(\ddf{\xi}) = 0
+\end{align*}
+for a complex number \( \lambda \) is a generalized eigenfunction%
+\index{generalized eigenfunction}
+with eigenvalue \( \lambda \).  The eigenfunction is ``generalized''
+because there is no assumption \( \phi \) belongs to a specific \( L^2 \)
+space, just that \( K[\phi] \) and \( m(\phi) \) can be computed.  The
+second condition, orthogonality to constants in \( L^2(m) \) will be
+automatically satisfied when \( \abs{\lambda} < 1 \).  Such an
+eigenfunction yields a simple lower bound on the convergence of the
+chain to its stationary measure.
+
+% Referring to the notation above, assume that \( \phi \in L^2(m(\ddf{\xi}))
+% \) and \( \int \abs{\phi}^2 \df{m} = 1 \).
+
+%% Lemma 2.2 on page 157
+\begin{lemma}
+    Let \( p \in [1,\infty] \).
+    \begin{enumerate}
+        \item
+            For the \( x \)-chain
+            \begin{align*}
+                \| K_{x,\theta}^{\ell}/f - 1\|_{p, \bbP}^p &\le \int \|
+                \hat{k}_z^ {\ell-1} - 1\|_{p,m}^p f_{\theta}(z) \mu(\ddf
+                {z}) \\
+                & \le \sup_z \| \hat{k}_z^{\ell-1} - 1\|_{p,m}^p
+            \end{align*}
+            and
+            \[
+                \| \tilde{K}_{x,\theta}^l/f - 1 \|_{p,\bbP}^p \le \|
+                \hat{k}_x^{\ell-1} - 1\|_{p,m}^p.
+            \]
+        \item
+            For the \( \theta \)-chain
+            \begin{align*}
+                \| \tilde{K}_{x,\theta}^{\ell}/f - 1\|_{p, \bbP}^p &\le
+                \int \| k_{\theta}^ {\ell-1} - 1\|_{p,\pi}^p \pi(\theta
+                \given x) \pi(\ddf{\theta}) \\
+                & \le \sup_{\theta} \| k_{\theta}^{\ell-1} - 1\|_{p,\pi}^p
+            \end{align*}
+            and
+            \[
+                \| K_{x,\theta}^l/f - 1 \|_{p,\bbP}^p \le \| k_{\theta}^
+                {\ell-1} - 1\|_{p,\pi}^p.
+            \]
+    \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+    \begin{enumerate}
+        \item
+            Recall the bivariate chain has transition density
+            \[
+                K(x, \theta; x', \theta') = f_{\theta}(x')f_{\theta'}(x')/m
+                (x').
+            \] By direct computation
+            \[
+                K^{\ell}(x,\theta; x', \theta') = \int f_{\theta}(z) k^{\ell-1}
+                (z,x') \frac{f_{\theta'}(x')}{m(x')} \mu(\ddf{z}).
+            \]
+        \item
+            For the variant \( \tilde{K} \), the similar formula reads
+            \[
+                \tilde{K}^{\ell}(x,\theta; x', \theta') = \int k^{\ell-1}
+                (x,z) \frac{f_{\theta'}(z)}{m(z)} f_{\theta'}(x')\mu(\ddf
+                {z}).
+            \]
+        \item
+            These two bivariate chains have stationary density \( f(x,\theta)
+            = f_{\theta}(x) \) with respect to the measure \( \mu(\ddf{x})
+            \cdot \pi(\ddf{\theta}) \).  So write
+            \[
+                \frac{K^{\ell}(x,\theta; x', \theta')}{f(x', \theta')} -
+                1 = \int (\hat{k}^{\ell-1}(z,x')-1) f_{\theta}(z) \mu(\ddf
+                {z})
+            \] and
+            \[
+                \frac{ \tilde{K}^{\ell}(x,\theta; x', \theta')}{f(x',
+                \theta')} - 1 = \int (\hat{k}^{\ell-1}(x,z)-1) f_{\theta'}
+                (z) \mu(\ddf{z}).
+            \]
+        \item
+            To prove the second inequality in the lemma (the proof of
+            the first is similar), write
+            \begin{align*}
+                & \| \tilde{K}_{x,\theta}^{\ell}/f - 1 \|_{p, \bbP}^p \\
+                &= \iint \abs{\int (\hat{k}^{\ell-1}(x,z)-1) f_{\theta'}
+                (z) \mu(\ddf{z})}^p \cdot f_{\theta'}(x') \mu(\ddf{x'})\pi
+                (\ddf{\theta'}) \\
+                &\le \iint \int \abs{ (\hat{k}^{\ell-1}(x,z)-1) }^p f_{\theta'}
+                (z) \mu(\ddf{z}) \cdot f_{\theta'}(x') \mu(\ddf{x'})\pi(\ddf
+                {\theta'}) \\
+                &= \int \abs{ (\hat{k}^{\ell-1}(x,z)-1) }^p m(z) \mu(\ddf
+                {z}) \\
+                &= \int \abs{ (\hat{k}^{\ell-1}(x,z)-1) }^p m(\ddf{z}).
+                \\
+            \end{align*}
+    \end{enumerate}
+\end{proof}
+
+The following is the proof of the lower bound.
+\begin{lemma}
+    %% Lemma 2.3 on page 157
+    Consider \( g \) as a function of \( x \) only, with the abuse of
+    notation \( g(x,\theta) = g(x) \).  Then
+    \[
+        \tilde{K}g(x,\theta) = \int k(x,x') g(x')\mu(\ddf{x'}).
+    \]
+\end{lemma}
+
+\begin{proof}
+    Assume \( g(x,\theta) = g(x) \), then
+    \begin{align*}
+        \tilde{K}g(x,\theta) &= \iint \frac{f_{\theta'}(x) f_{\theta'}(x')}
+        {m(x)} g(x')\mu(\ddf{x'}) \pi(\ddf{\theta'}) &= \int k(x,x') g(x')
+        \mu(\ddf{x'}).
+    \end{align*}
+\end{proof}
+
+\begin{lemma}
+    %% Lemma 2.4 on page 157
+    \begin{enumerate}
+        \item
+            Let \( \chi_{x,\theta}^2(\ell) \) and \( \tilde{\chi}_{x,\theta}^2
+            (\ell) \) be the chi-square distances after \( \ell \) steps
+            for the \( K \)-chain and the \( \tilde{K} \)-chain,
+            respectively, starting at \( (x,\theta) \).
+        \item
+            Let \( \chi_x^2(\ell) \), \( \chi_{\theta}^2(\ell) \) be the
+            chi-square distance for the \( x \)-chain starting at \( x \)
+            and the \( \theta \)-chain starting at \( \theta \).
+    \end{enumerate}
+    Then
+    \begin{enumerate}
+        \item
+            \begin{align*}
+                \chi_x^2(\ell) &\le \tilde{\chi}_{x,\theta}^2(\ell) \le
+                \chi_x^2(\ell-1) \\
+                \| k_x^{\ell} - m \|_{TV} &\le \| \tilde{K}_{x,\theta}^{\ell}
+                - f \|_{TV} \le \| k_x^{\ell-1} - m \|_{TV}.
+            \end{align*}
+        \item
+            \begin{align*}
+                \chi_{\theta}^2(\ell) &\le \tilde{\chi}_{x,\theta}^2(\ell)
+                \le \chi_{\theta}^2(\ell-1) \\
+                \| k_{\theta}^{\ell} - 1 \|_{TV} &\le \| K_{x,\theta}^{\ell}
+                - f \|_{TV} \le \| k_x^{\ell-1} - 1 \|_{TV}.
+            \end{align*}
+    \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+    This is immediate from the previous lemmas.
+\end{proof}
+
+\subsubsection*{Eigenvalues and Eigenfunctions}
+
+The results of this section show common Gibbs sampler Markov chains have
+polynomial eigenvectors, with explicitly known eigenvalues.  This
+includes the \( x \)-chain, \( \theta \)-chain and the random scan
+chain.
+
+Let \( k = \card{%
+\operatorname{supp}
+(m(x))} \), where \( m(x) \) is the marginal density on \( \mathcal{X} \),
+\( m(x) = \int_{\Theta} f_{\theta}(x) \pi(\ddf{\theta}) \).  Using here
+the notation \( k \) is consistent with the convention that the number
+of states in a Markov chain is \( k \), not to be confused with the
+Markov kernels previously.  The value of \( k \) may be finite or
+infinite.  To be definite in this section, assume the support of \( \pi \)
+is infinite.  Moreover, make the following hypotheses.
+\begin{description}
+    \item[H1:]
+        For some \( \alpha_x > 0 \) and \( \alpha_{\theta} >0 \),
+        \[
+            \int \EulerE^{\alpha_x \abs{x} + \alpha_{\theta} \abs{\theta}}
+            \dProb < \infty.
+        \]
+    \item[H2:]
+        For \( 0 \le \nu < k \), the \( \nu \)th moment \( \Esub{\theta}
+        {X^\nu} \) is a polynomial in \( \theta \) of degree \( \nu \)
+        with leading coefficient \( \eta_{\nu} > 0 \).
+    \item[H3:]
+        For \( \nu \ge 0 \), the \( \nu \)th moment \( \Esub{x}{\theta^\nu}
+        \) is a polynomial in \( x \) of degree \( \nu \) with leading
+        coefficient \( \mu_{\nu} > 0 \).
+\end{description}
+
+By (H1), \( L^2(m(\ddf{x})) \) admits a unique orthogonal basis of monic
+polynomials \( p_{\nu} \), \( 0 \le \nu < \infty \), with \( p_\nu \)
+having degree \( \nu \).  Also, \( L^2(\pi(\ddf{\theta})) \) admits a
+unique orthogonal basis of monic polynomials \( q_\nu \), \( 0 \le \nu <
+\infty \), with \( q_{\nu} \) of degree \( \nu \).  As usual, \( \eta_0
+= \mu_0 = 1 \) and \( p_0 \equiv q_0 \equiv 1 \).  [Where can I find a
+justification of this?  Maybe start with polynomials \( 1 \), \( x \), \(
+x^2 \), etc and use Gram-Schmidt.  Need to know the polynomials span or
+something.]
+
+%% Theorem 3.1 on page 162
+\begin{theorem}
+    Assume (H1)--(H3), then
+    \begin{enumerate}
+        \item
+            \label{it:spectralbounds:thmparta} The \( x \)-chain has
+            eigenvalues \( \lambda_{\nu} = \eta_{\nu} \mu_{\nu} \) with
+            eigenvectors \( p_{\nu} \), \( 0 \le \nu < \infty \).
+        \item
+            \label{it:spectralbounds:thmpartb} The \( \theta \)-chain
+            has eigenvalues \( \lambda_{\nu} = \eta_{\nu} \mu_{\nu} \)
+            with eigenvectors \( q_{\nu} \), \( 0 \le \nu < \infty \)
+            and eigenvalues \( 0 \) with eigenvectors \( q_{\nu} \) for \(
+            k \le \nu < \infty \).
+        \item
+            \label{it:spectralbounds:thmpartc} The random scan chain has
+            spectral decomposition given by eigenvalues \( \frac{1}{2}
+            \pm \frac{1}{2} \sqrt{\eta_{\nu} \mu_{\nu}} \) and
+            eigenvectors \( p_{\nu} (x) \pm \sqrt{\frac{\eta_{\nu}}{\mu_
+            {\nu}}} q_{\nu}(\theta) \) for \( 0 \le \nu < k \) and
+            eigenvalues \( \frac{1}{2} \) and eigenvectors \( q_{\nu} \)
+            for \( k \le \nu < \infty \).
+    \end{enumerate}
+\end{theorem}
+
+\begin{lemma}
+    \label{lem:spectralbounds:lemma1} %% Lemma A1, page 174-175
+    \[
+        \Esub{\theta}{p_{\nu}(X)} = \eta_{\nu} q_{\nu}(\theta), \quad 0
+        \le \nu < k.
+    \]
+\end{lemma}
+
+\begin{proof}
+    \begin{enumerate}
+        \item
+            For \( \nu = 0 \), \( \Esub{\theta}{p_{\nu}} = 1 = \eta_0 q_0
+            \).
+        \item
+            If \( 0 < \nu < k \), then for \( 0 \le i < \nu \) the
+            unconditional expectation is given by
+            \[
+                \E{\theta^i p_{\nu}(X)} = \E{ p_{\nu}(X) \Esub{X}{\theta^i}}
+                = \E{p_{\nu}(X) \hat{p}(X)}
+            \] with \( \hat{p} \) a polynomial of degree \( i < k \).
+            Since \( 0 \le i < \nu < k \),
+            \[
+                \E{p_{\nu}(X) \hat{p}(X)} = 0
+            \] by orthogonality.
+        \item
+            Thus, \( 0 = \E{\theta^i p_{\nu}(X)} = \E{\theta^i \Esub{\theta}
+            {p_{\nu}(X)}} \).
+        \item
+            By assumption (H2) \( \eta_{\nu}^{-1} \Esub{\theta}{p_{\nu}(X)}
+            \) is a monic polynomial of degree \( k \) in \( \theta \).
+        \item
+            Since it is orthogonal to all polynomials of degree less
+            than \( k \),
+            \[
+                \Esub{\theta}{p_{\nu}(X)} = \eta_{\nu} q_{\nu} (\theta).
+            \]
+    \end{enumerate}
+\end{proof}
+
+\begin{lemma}
+    \label{lem:spectralbounds:lemma2} %% Lemma A2, p. 175
+    \[
+        \Esub{x}{q_{\nu}(\theta)} = \mu_{\nu} p_{\nu}(x), \quad 0 \le
+        \nu < k.
+    \] If \( k < \infty \), \( \Esub{x}{q_{\nu}(\theta)} = 0 \) for \(
+    \nu \ge k \).
+\end{lemma}
+
+\begin{proof}
+    \begin{enumerate}
+        \item
+            The first part is proved as in~%
+            \ref{lem:spectralbounds:lemma1}.
+        \item
+            If \( k < \infty \) and \( \nu \ge k \) by the same
+            argument, for \( 0 \le j <c \),
+            \[
+                \E{p_j(X) \Esub{X}{q_{\nu}(\theta)} }=0.
+            \]
+        \item
+            But \( p_j \), \( 0 \le j < k \) form a basis for \( L^2(m(\ddf
+            {x})) \) and \( \Esub{X}{q_{\nu}(\theta)} \in L^2(m(\ddf{x}))
+            \) since
+            \[
+                \E{ (\Esub{X}{q_{\nu}(\theta)})^2 } \le \E{ q_{\nu}^{2}(\theta)}
+                < \infty.
+            \]
+        \item
+            Then \( \Esub{X}{q_{\nu}(\theta)} = 0 \) follows.
+    \end{enumerate}
+\end{proof}
+
+\begin{proof}
+    \begin{enumerate}
+        \item
+            Suppose \( 0 \le \nu < k \).  From the definitions, the \( x
+            \)-chain operates on \( p_{\nu} \) as
+            \[
+                \Esub{x}{ \Esub{\theta}{p_{\nu}(X')}} = \Esub{x}{\eta_{\nu}
+                q_{\nu}(\theta)} = \eta_{\nu} \mu_{\nu} p_{\nu}(x)
+            \] with equalities from Lemma~%
+            \ref{lem:spectralbounds:lemma1} and Lemma~%
+            \ref{lem:spectralbounds:lemma2}.  This proves part~%
+            \ref{it:spectralbounds:thmparta}.
+        \item
+            Suppose \( 0 \le \nu < k \).  Then as in the previous step,
+            the \( \theta \)-chain operates on \( q_{\nu} \) as
+            \[
+                \Esub{\theta}{ \Esub{x}{q_{\nu}(\theta')}} = \Esub{\theta}
+                {\mu_{\nu} p_{\nu}(\theta)} = \mu_{\nu} \eta_{\nu} q_{\nu}
+                (x)
+            \] with equalities from Lemma~%
+            \ref{lem:spectralbounds:lemma1} and Lemma~%
+            \ref{lem:spectralbounds:lemma2}.  This proves part~%
+            \ref{it:spectralbounds:thmpartb}.  If \( k < \infty \), then
+            for \( \nu \ge k \), Lemma~%
+            \ref{lem:spectralbounds:lemma2} shows that \( q_{\nu} \) is
+            an eigenfunction for the \( \theta \)-chain with eigenvalue \(
+            0 \).
+        \item
+            The random scan chain takes \( L^2(P) \) into \( L^2(m) + L^2
+            (\pi) \subseteq L^2(P) \).  Then \( \ker K \supseteq L^2(m)
+            + L^2(\pi)^{\perp} \).  [Do I want to use circplus for
+            direct sum here?] Then
+            \[
+                K g(X,\theta) = \frac{1}{2} \Esub{x}{g(x,\theta')} +
+                \frac{1}{2} \Esub{\theta}{g(X', \theta)}.
+            \]
+        \item
+            For \( 0 \le \nu < k \), consider \( K \) acting on \( p_{\nu}
+            (x) + \sqrt{\frac{\eta_{\nu}}{\mu_{\nu}}}q_{\nu}(\theta) \).
+            The result is
+            \begin{multline*}
+                \frac{1}{2} \left( p_{\nu}(x) + \sqrt{\frac{\eta_{\nu}}{\mu_
+                {\nu}}} \Esub{x}{q_{\nu}(\theta')} \right) + \frac{1}{2}
+                \left( \Esub{\theta}{p_{\nu}(x)} + \sqrt {\frac{\eta_{\nu}}
+                {\mu_{\nu}}} q_{\nu}(\theta) \right) \\
+                = \left( \frac{1}{2} + \frac{1}{2} \sqrt{\eta_{\nu} \mu_
+                {\nu}} \right) \left( p_{\nu}(x) + \sqrt{\frac{\eta_{\nu}}
+                {\mu_{\nu}}} q_{\nu}(\theta) \right).
+            \end{multline*}
+        \item
+            Similarly, consider \( K \) acting on \( p_{\nu}(x) - \sqrt{\frac
+            {\eta_{\nu}}{\mu_{\nu}}}q_{\nu}(\theta) \)
+            \begin{multline*}
+                \frac{1}{2} \left( p_{\nu}(x) - \sqrt{\frac{\eta_{\nu}}{\mu_
+                {\nu}}} \Esub{x}{q_{\nu}(\theta')} \right) - \frac{1}{2}
+                \left( \Esub{\theta}{p_{\nu}(x)} - \sqrt {\frac{\eta_{\nu}}
+                {\mu_{\nu}}} q_{\nu}(\theta) \right) \\
+                = \left( \frac{1}{2} - \frac{1}{2} \sqrt{\eta_{\nu} \mu_
+                {\nu}} \right) \left( p_{\nu}(x) - \sqrt{\frac{\eta_{\nu}}
+                {\mu_{\nu}}} q_{\nu}(\theta) \right).
+            \end{multline*}
+            [Check all minus signs here.]
+        \item
+            Suppose first that \( k < \infty \).  For \( \nu \ge k \),
+            Lemma~%
+            \ref{lem:spectralbounds:lemma2} shows \( \Esub{x}{q_{\nu}(\theta)}
+            = 0 \) for all \( x \).  Thus \( Kq_{\nu}(x,\theta) = \frac{1}
+            {2} q_{\nu}(\theta) \).
+        \item
+            Further
+            \begin{align*}
+                &
+                \operatorname{span}
+                \left\{ p_{\nu}(x) \pm \sqrt{\frac{\eta_{\nu}}{\mu_{\nu}}}
+                q_{\nu}(\theta) \text{ for} 0 \le \nu < c, \text{ and }
+                q_{\nu}(\theta) \text{ for } c \le \nu < \infty \right\}
+                \\
+                &\qquad =
+                \operatorname{span}
+                \left\{ p_{\nu}(x) \text{ for } 0 \le \nu < c, \text{%
+                and } q_{\nu}(\theta) \text{ for } 0 \le \nu < \infty
+                \right\} \\
+                &\qquad = L^2(m) + L^2(\pi).
+            \end{align*}
+        \item
+            It follows that \( K \) is diagonalizable with eigenvalues
+            and respective eigenvectors
+            \begin{align*}
+                &\frac{1}{2} \pm \frac{1}{2} \sqrt{\eta_{\nu} \mu_{\nu}}
+                & p_{\nu}(x) \pm \sqrt{\frac{\eta_{\nu}}{\mu_{\nu}}}q_{\nu}
+                (\theta) & 0 \le \nu < c\\
+                &\frac{1}{2} & q_{\nu}(\theta) & k \le \nu < \infty
+            \end{align*}
+            and \( Kg = 0 \) for \( g \in (L^2(m) + L^2(\pi))^{\perp} \).
+        \item
+            Suppose next that \( k = \infty \), then \( K \) is
+            diagonalizable with eigenvalues and respective eigenvectors
+            \[
+                \frac{1}{2} \pm \frac{1}{2} \sqrt{\eta_{\nu} \mu_{\nu}}
+                \qquad p_{\nu}(x) \pm \sqrt{\frac{\eta_{\nu}}{\mu_{\nu}}}q_
+                {\nu}(\theta)
+            \] for \( 0 \le \nu < k \).
+        \item
+            Again
+            \begin{align*}
+                &
+                \operatorname{span}
+                \left\{ p_{\nu}(x) \pm \sqrt{\frac{\eta_{\nu}}{\mu_{\nu}}}
+                q_{\nu}(\theta) \right\} \text{ for} 0 \le \nu < k \\
+                &\qquad =
+                \operatorname{span}
+                \left\{ p_{\nu}(x) \text{ for} 0 \le \nu < c, \text{%
+                and } q_{\nu}(\theta) \text{ for } 0 \le \nu < k \right\}
+                \\
+                &\qquad = L^2(m) + L^2(\pi)
+            \end{align*}
+            and \( Kg = 0 \) for \( g \in (L^2(m) + L^2(\pi))^{\perp} \).
+    \end{enumerate}
+\end{proof}
+
+\subsubsection*{Beta/Binomial}
+
+The following is a fairly simple and specific example of applying the
+convergence results to a common probability stituation.
+
+Consider \( (\mathcal{X}, \mathcal{F}) = (\set{0:n}, 2^{\set{0:n}}) \) (where
+\( \set{0:n} = \set{0, 1, 2, \dots, n} \) and \( 2^{\set{0:n}} \) is the
+power set of \( \set{0:n} \), a finite \( \sigma \)-algebra of sets) as
+the measure space equipped with the counting measure \( \mu(\ddf {x}) \).
+Consider the family of \( \sigma \)-finite measures defined by the
+Binomial mass function
+\[
+    f_{\theta}(x) = f(x; \theta) = \binom{n}{x}\theta^x(1-\theta)^{n-x}
+\] for natural number \( x \in \set{0:n}, \theta \in (0, 1) \).
+
+Consider \( (\Theta, \mathcal{G}) = ((0, 1), \mathcal{B}) \) (where \(
+\mathcal{B} \) is the \( \sigma \)-algebra of Borel sets on \( (0, 1) \))
+as the measure space.  Take the \emph{prior distribution} for \( \theta \)
+as the uniform probability density on \( (0,1) \).  This is a special
+case of the Beta distribution with shape parameters \( \alpha = 1 \) and
+\( \lambda = 1 \).  The special case will make the example easier by
+mostly avoiding the technicalities of the Beta distribution without
+losing much generality.
+
+Together these densities define the bivariate Beta/Binomial density%
+\index{Beta/Binomial}
+(uniform prior)
+\[
+    f(x,\theta) = \binom{n}{x}\theta^x(1-\theta)^{n-x}.
+\] The goal is to sample the marginal distribution \( f(x) \) on \(
+\mathcal{X} \) using the Gibbs sampler \( x \)-chain.  The marginal
+density,
+\begin{align*}
+    m(x) &= \int_0^1 f(x,\theta) \df{\theta} \\
+    &= \frac{n!}{x!  \cdot (n-x)!} \int_0^1 \theta^x(1-\theta)^{n-x} \df
+    {\theta} \\
+    &= \frac{n!}{x!  \cdot (n-x)!} \frac{\Gamma(x+1) \cdot \Gamma(n-x+1)}
+    {\Gamma(n+2)} \\
+    &= \frac{n!}{x!  (n-x)!} \frac{x!  \cdot (n-x)!}{(n+1)!} \\
+    &= \frac{1}{n+1},
+\end{align*}
+the uniforma denity on \( \set{0:n} \), is simple and explicit.  As
+such, characteristics of the marginal density need not be generated by
+the Gibbs sampler.  However, this simple example is ideal for
+illustrative purposes.
+
+The posterior density with respect to \( \pi(\ddf{\theta}) \) is
+\[
+    \\
+    pi(\theta \given x) = \binom{n}{x}\theta^x(1-\theta)^{n-x} =
+    \operatorname{Beta}
+    (x+1, n-x+1),
+\] a well-known statistical distribution.  This means the \( x \)-chain
+sampler can proceed as
+\begin{enumerate}
+    \item
+        Given \( x \), draw \( \theta' \) from \(
+        \operatorname{Beta}
+        (x+1, n-x+1) \).
+    \item
+        Then given \( \theta' \), draw \( x' \) from \(
+        \operatorname{Binomial}
+        (n,\theta') \).
+\end{enumerate}
+The transition kernel for the \( x \)-chain is
+\[
+    k(x,x') = \int_0^1 \pi(\theta \given x) f_{\theta}(x') \pi(\ddf{\theta})
+    = \int_{\Theta} \frac{f_{\theta}(x) \cdot f_{\theta}(x')}{m(x)} \pi(\ddf
+    {\theta}).
+\] Note further that \( m(x) k(x,x') = m(x') k(x',x) \) so that the \( x
+\)-chain is reversible with \( m(\ddf{x}) \) as a stationary
+distribution. Explicitly, the transition kernel is
+\begin{align*}
+    k(x,x') &= \int_{\Theta} \frac{f_{\theta}(x) \cdot f_{\theta}(x')}{m
+              (x)} \pi(\ddf{\theta}) \\
+            &= \int_0^1 f_{\theta}(x')\pi(\ddf{\theta})
+    \df{\theta} \\
+    &= \int_0^1 \binom{n}{x}\theta^x(1-\theta)^{n-x} \cdot \binom{n}{x'}\theta^
+    {x'}(1-\theta)^{n-x'} \cdot \frac{1}{1/(n+1)} \df{\theta} \\
+    &= (n+1) \binom{n}{x} \binom{n}{x'} \int_0^1 \theta^{x+x'}(1-\theta)^
+    {2n-x-x'} \df{\theta} \\
+    &= (n+1) \binom{n}{x} \binom{n}{x'} \frac{\Gamma(x+x'+1)\Gamma(2n-x-x'+1)}
+    {\Gamma(2n+1)} \\
+    &= (n+1) \binom{n}{x} \binom{n}{x'} \frac{(x+x')!  (2n-x-x')!}{(2n+1)!}
+    \\
+    &= \frac{(n+1)}{2n+1} \frac{\binom{n}{x} \binom{n}{x}}{\binom{2n}{x+x'}}.
+\end{align*}
+This expresses the \( x \)-chain kernel explicitly as a transition
+probability matrix.  Remember that the intention is to use the Gibbs
+sampler as a simple way to simulate the marginal instead of this direct
+and explicit calculation.  An R script for the \( x \)-chain simulation
+is in the Scripts section later.
+
+\begin{proposition}
+    \begin{enumerate}
+        \item
+            The \( x \)-chain for the marginal of the Beta/Binomial (uniform
+            prior) has eigenvalues
+            \begin{align*}
+                lambda_0 &= 1, \\
+                lambda_j &= \frac{n(n-1) \cdots (n-j+1)}{(n+2)(n+3)
+                \cdots (n+j+1)}, \quad 1 \le j \le n.
+            \end{align*}
+        \item
+            In particular, \( \lambda_1 = 1 - 2/(n+2) \).
+        \item
+            The eigenfunctions are the orthogonal polynomials for \( m(x)
+            = 1/(n+1) \) on \( \set{0:n} \), known as the discrete
+            Chebyshev polynomials.
+    \end{enumerate}
+\end{proposition}
+
+\begin{proof}
+    [Apply previous theorems]
+\end{proof}
+
+A script implementing the \( x \)-chain for the Beta/Binomial is in the
+Scripts section.  The results are in Figure~%
+\ref{fig:spectralbounds:betabin}. A script comparing the eigenvalues
+computer from the transition probability matrix with the theoretical
+eigenvalues in the Proposition is in the Scripts section, The two sets
+of values agree to essentially machine precision.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.50]{betabinomial}
+    \caption{Sampling the discrete uniform marginal distribution from
+    the Beta/Binomial with uniform prior.  The QQ plot demonstrates good
+    agreement of the sample quantiles with the discrete uniform
+    distribution.  Agreement with the discrete uniform mass function is
+    harder to see in the histogram.}%
+    \label{fig:spectralbounds:betabin}
+\end{figure}
+
+\subsubsection*{Poisson/Gamma}
+
+The following example of the \( x \)-chain for the Poisson/Gamma
+distributions is a generalization of the previous example of the
+Poisson/Exponential distributions.
+
+Consider \( (\mathcal{X}, \mathcal{F}) = (\Naturals, 2^{\Naturals}) \) (where
+\( 2^{\Naturals} \) is the power set of \( \Naturals \), a \( \sigma \)-algebra
+of sets) as the measure space equipped with the counting measure \( \mu(\ddf
+{x}) \).  Consider the family of \( \sigma \)-finite measures defined by
+the Poisson mass function \( f_{\theta}(x) = f(x; \theta) = \EulerE^{-\theta}
+\theta^x/x! \) for natural number \( x \in \Naturals \) and parameter \(
+\theta \in (0, \infty) \).  The usual notation for the Poisson mass
+function parameter is \( \lambda \) but this example uses \( \theta \)
+to be consistent with the section on Two-Component Gibbs Sampling.
+
+Consider \( (\Theta, \mathcal{G}) = ((0,\infty), \mathcal{B}) \) (where \(
+\mathcal{B} \) is the \( \sigma \)-algebra of Borel sets on \( (0,
+\infty) \)) as the measure space.  Fix parameters \( \alpha \) and \( a
+> 0 \) for the Gamma function.  Take the \emph{prior distribution} as
+the Gamma probability density with shape parameter \( a \) and scale
+parameter \( \alpha \)
+\[
+    \pi(\theta; a, \alpha) = \frac{ \theta^{a-1} \EulerE^{-\theta/\alpha}}
+    {\alpha^a \Gamma(a)}
+\] as a family of probability densities on \( (0,\infty) \) with respect
+to Lebesgue measure.  When \( \alpha = 1 \) and \( a = 1 \), the prior
+is the exponential density \( \EulerE^{-\theta} \), as in the previous
+example of the Poisson/Exponential chain.
+
+Following the derivation in the subsection on Two-Component Gibbs
+Sampling the marginal density on \( \mathcal{X} = \Naturals \) is
+\begin{align*}
+    m(x) &= \int_{\Theta} f_{\theta}(x) \pi(\ddf{\theta}) = \int\limits_0^
+    {\infty} \frac{\EulerE^{-\theta} \theta^x}{x!} \cdot \frac{ \theta^{a-1}
+    \EulerE^{-\theta/\alpha}}{\alpha^a \Gamma(a)} \df{\theta} \\
+    &= \frac{1}{\alpha^a \Gamma(a) x!} \int\limits_0^{\infty} \EulerE^{-
+    (1+1/\alpha)\theta} \theta^{x + a - 1} \df{\theta} \\
+    &= \frac{1}{\alpha^a \Gamma(a) x!} \frac{1}{\left( (\alpha + 1)/\alpha
+    \right)^{x+a-1}} \frac{1}{\left( (\alpha + 1)/\alpha \right)} \cdot
+    \\
+    &\qquad \qquad \int_0^ {\infty} \EulerE^{-((\alpha+1)/\alpha)\theta}
+    \left( \frac{\alpha+1} {\alpha} \theta \right)^{x+a-1} \df{ \left(
+    \frac{\alpha+1}{\alpha} \theta \right)} \\
+    &= \frac{1}{\alpha^a \Gamma(a) x!} \frac{1}{\left( (\alpha + 1)/\alpha
+    \right)^{x+a}} \int_0^{\infty} \EulerE^{-z} z^{x+a-1} \df{z} \\
+    &= \frac{1}{\alpha^a \Gamma(a) x!} \frac{\Gamma(x+a)}{\left( (\alpha
+    + 1)/\alpha \right)^{x+a}} \\
+    &= \frac{\alpha^x}{x!  (\alpha + 1)^{x+a}} \frac{\Gamma(x+a)}{\Gamma
+    (a)} \\
+    &= \frac{(a)_x}{x!}\left( \frac{1}{\alpha+1} \right)^a \left( \frac{\alpha}
+    {\alpha+1} \right)^x.
+\end{align*}
+The last equality follows from the Gamma function identities
+\[
+    \Gamma(a+x) = a(a+1)(a+2)\cdots(a+x-1) \Gamma(a) = (a)_x \Gamma(a)
+\] where \( (a)_x \) is the rising Pochhammer symbol%
+\index{Pochhammer
+  symbol}%
+, also called the shifted factorial,
+\[
+    (a)_x =
+    \begin{cases}
+        1 & x = 0, \\
+        a(a+1)(a+2)\cdots(a+x-1) & x > 0.
+    \end{cases}
+\] See the exercises for a direct proof that the marginal distribution
+is a probability distribution.
+
+When \( a \) is a positive integer,
+\[
+    m(x) = \frac{(a)_x}{x!}\left( \frac{1}{\alpha+1} \right)^a \left(
+    \frac{\alpha}{\alpha+1}\right)^x
+\] is the negative binomial distribution for the additional number \( x \)
+of independent Bernoulli trials, i.e.\ failures, required to attain \( a
+\) successes, each with success probability \( 1/(\alpha+1) \).%
+\index{negative binomial probability distribution}
+In that case the term
+\[
+    \frac{(a)_n}{x!} = \frac{a(a+1)(a+2)\cdots(a+x-1)}{x!} = \binom{a+x-1}
+    {a-1}
+\] is the usual expression in the negative binomial distribution. The
+calculation of the marginal distribution is the derivation of the
+negative binomial as a continuous mixture of Poisson distributions where
+the mixing distribution of the Poisson rate is a Gamma distribution.  In
+the special case of the Poisson/Exponential example where \( \alpha = a
+= 1 \), the general form of the marginal reduces to \( m(x) = 1/2^{x+1} \).
+
+The posterior density with respect to \( \pi(\ddf{\theta}) \) is
+\begin{align*}
+    \pi(\theta \given x) &= f_{\theta}(x)/m(x) = f(x; \theta)/m(x)\\
+    &= \frac{\EulerE^{-\theta} \theta^x}{x!} \cdot \frac{x!}{\alpha^x}
+    \cdot \frac{\Gamma(a) (\alpha + 1)^{x+a}}{\Gamma(x+a)} &= \frac{\EulerE^
+    {-\theta} \theta^x \Gamma(a) \alpha^{a}}{\Gamma(x+a)} \left( \frac{\alpha
+    + 1}{\alpha} \right)^{x+a} \\
+    &=\frac {\EulerE^{-\theta} \theta^x (\alpha+1)^{x+a}}{\alpha^x (a)_x}.
+\end{align*}
+
+The \defn{\( x \)-chain} is:  first draw \( \theta' \) from \( \pi(\theta'
+\given x) \) and then \( x' \) from \( f_{\theta'}(x') \).  The \( x \)-chain
+has transition kernel
+\begin{align*}
+    k(x,x') &= \int_0^{\infty} \pi(\theta \given x) f_{\theta}(x') \pi(\ddf
+    {\theta}) \\
+    &= \int_0^{\infty} \frac{\EulerE^{-\theta} \theta^x \Gamma(a) \alpha^
+    {a}}{\Gamma(x+a)} \left( \frac{\alpha + 1}{\alpha} \right)^{x+a}
+    \cdot \frac{\EulerE^{-\theta} \theta^{x'}}{x'!} \cdot \frac{\theta^{a-1}
+    \EulerE^{-\theta/\alpha}}{\Gamma(a) \alpha^{a}} \df{\theta} \\
+    &= \int_0^{\infty} \frac{\EulerE^{-(1 + 1/\alpha)\theta} \theta^{x +
+    a - 1}}{\Gamma(x+a) \left( \alpha/(\alpha+1) \right)^{x+a}} \cdot
+    \frac{\EulerE^{-\theta} \theta^{x'}}{x'!} \df{\theta} \\
+    &= \frac{1}{\Gamma(x+a) \left( \alpha/(\alpha+1) \right)^{x+a}}
+    \frac{1}{x'!} \int_0^{\infty} \EulerE^{-(2 + 1/\alpha)\theta} \theta^
+    {x + x' + a - 1} \df{\theta} \\
+    &= \frac{\Gamma(x+x'+a) \left( \alpha/(2\alpha+1)\right)^{x+x'+a}}{\Gamma
+    (x+a) \left( \alpha/(\alpha+1)\right)^{x+a} x'!}.
+\end{align*}
+The last integral follows from the definition of the gamma function, see
+the exercises
+
+When \( \alpha = a = 1 \), the prior is the negative binomial
+probability distribution%
+\index{negative binomial probability distribution}
+and the transition kernel reduces to
+\begin{align*}
+    k(x,x') &= \binom{x+x'}{x} \left( \frac{1}{3} \right)^{x+x'+1} \Big/
+    \left( \frac{1}{2} \right)^{x+1}, \\
+    m(x) &= 1/2^{x+1}.
+\end{align*}
+
+% Possibly helpful
+% https://www.hindawi.com/journals/ijmms/2015/620569/
+% Maybe look at Chihara
+
+The Gauss series defines the regular hypergeometric function%
+\index{regular hypergeometric function}
+\begin{align*}
+    {}_2F_1(a,b; c; z) &= 1 + \frac{a \cdot b}{c} \frac{z}{1!} + \frac{a
+    (a+1) \cdot b(b+1)}{c(c+1)} \frac{z^2}{2!} + \cdots \\
+    & =\sum\limits_{\nu=0}^{\infty} \frac{(a)_{\nu} (b)_{\nu}}{(c)_{\nu}}
+    \frac{z^{\nu}}{\nu!}
+\end{align*}
+which converges (if \( c \ne 0, -1,-2, \dots \)) for \( \abs{z} < 1 \).
+If \( a = 0, -1, -2, \dots \) is a negative integer, the regular
+hypergeometric function is a degree \( -a \) polynomial.
+
+The orthogonal polynomials for the negative binomial are Meixner
+polynomials \( M_j(x; a, \alpha) \).%
+\index{Meixner polynomials}
+See the exercises.  The Meixner polynomials (also called discrete
+Laguerre polynomials) are a family of discrete orthogonal polynomials on
+\( \mathcal{X} = \set{0,1,2,3, \dots} \) introduced by Josef Meixner in
+1934.  One definition of the Meixner polynomials in terms of the regular
+hypergeometric function is
+\[
+    M_j(x; a, \alpha) = {}_2F_1 \left( -j, -x; a; -\alpha \right).
+\] In this definition, the parameter \( \alpha > 0 \) corresponds to a
+Bernoulli trial success probability \( \frac{1}{\alpha + 1} \) and the
+integer parameter \( a \) corresponds to the number of successes in the
+negative binomial distribution.  An alternate definition~%
+\cite[V-3.4, page 161]{chihara78} with a different normalization is
+\[
+    m_j(x; \beta, c) = (\beta)_j \cdot {}_2F_1 \left( -j, -x; \beta; 1 -
+    1/c \right).
+\] where \( 0 < c < 1 \) and \( \beta > 0 \).  In the second alternative
+normalized definition for \( m_j \) the parameter \( c \) represents the
+success probability \( 1/(\alpha+1) \) so \( -\alpha = 1 - 1/c \).  With
+the correspondence \( \beta = a \) and \( c = 1/(\alpha + 1) \)
+\[
+    m_j(x; a, 1/(\alpha+1) ) = (a)_j M_j(x; a, \alpha).
+\] The following discussion will use \( M_j(x; a, \alpha) \) as the
+definition of the Meixner polynomials.
+
+The first three Meixner polynomials are
+\begin{align*}
+    M_0(x; a,\alpha) &= 1, \\
+    M_1(x; a,\alpha) &= 1 - \frac{\alpha}{a}x = \frac{a - \alpha x}{a},\\
+    M_2(x; a,\alpha) &= 1 - \frac{2\alpha}{a}x + \frac{\alpha^2}{a(a+1)}x
+    (x+1).
+\end{align*}
+See the exercises.
+
+The orthogonality relation for the normalized Meixner polynomials, see
+\cite[VI-3.4, 176]{chihara78}, slightly rewritten here to emphasize the
+negative binomial weight function and using the parameter
+correspondence, is
+\[
+    \sum_{x=0}^{\infty} m_j(x; a, \alpha) m_\ell(x; a, \alpha) \frac{(a)_x}
+    {x!} \left( \frac{1}{\alpha+1} \right)^x \left( \frac{\alpha}{\alpha+1}
+    \right)^a = \left( \frac{1}{\alpha+1} \right)^{-j} j!  (a)_j \delta_
+    {j\ell}.
+\] This can be verified from the generating function definition of the
+Meixner polynomials, see the exercises.  Dividing through by \( (a)_j \)
+and \( (a)_\ell \) and rearranging slightly (and simplifying by using \(
+(a)_\ell = (a)_j \) when \( j = \ell \)), now the orthogonality relation
+for the unnormalized Meixner polynomials is
+\[
+    \sum\limits_{x=0}^{\infty} M_j(x) M_\ell(x) m(x) = \frac{(1+\alpha)^j
+    j!}{(a)_j} \delta_{j\ell}.
+\]
+
+In Section 18.19, the Digital Library of Mathematical Functions gives
+the formula for the leading coefficients of the Meixner polynomials as
+\[
+    M_n(x; \beta, c) \qquad (1-1/c)^n/(\beta)_n.
+\] Note the falling Pochhammer symbol.  In Section 18.19, the Digital
+Library of Mathematical Functions also gives the expression for the
+orthogonality conditions.  [ But the symbols need to be unraveled.]
+
+% Needs to be edited out.
+
+% Also Mathworld
+% has a constant \( (\gamma)_n \) in front of the hypergeometric notation.
+% \[
+%     M_n(x,\beta,\gamma) = \sum\limits_{k=0}^n (-1)^k \binom{n}{k} \binom
+%     {x}{k} k!  (x+\beta)_{n-k}\gamma^{-k}
+% \] where the Pochhammer symbol is the rising factorial \( (x)_n = x(x+1)
+% (x+2) \cdots (x+n-1) \). (For example, \( (z)_0 =1 \), \( (z)_1 = z \), \(
+% (z)_2 = x(x+1) = x^2 + x \), \( (x)_3 = x(x+1)(x+2) = x^3 + 3x^2 + 2x \),
+% etc.  Notations among authors differ for the rising factorial, so care
+% is needed in the definition.)
+
+%  and the Digital Library of Mathematical Functions writes
+% \[
+%     M_n(x; \beta, c) = {}_2F_1 \left( -n, -x, \beta ; 1-1/c \right).
+% \]
+
+% The first parameter here, variously written as \( \beta \) and \( b \)
+% corresponds to Diaconis symbol \( a \) and the second parameter written
+% here written variously as \( \gamma \) and \( c \) corresponds to \(
+% 1-1/c \) in hypergeometric expression written as \( -\alpha \).  [This
+% needs to be sorted out.]
+
+% End of editing out.
+
+\begin{proposition}
+    For \( a > 0 \), \( \alpha > 0 \) the Poisson/Gamma \( x \)-chain
+    has
+    \begin{enumerate}
+        \item
+            Eigenvalues \( \lambda_j = (\alpha/(1 + \alpha))^j \), for \(
+            0 \le j < \infty \),
+        \item
+            Eigenfunctions \( M_j(x) \), the Meixner polynomials,
+        \item
+            For any \( \ell \ge 0 \) and any starting state \( x \)
+            \[
+                \chi_x^2(\ell) = \sum\limits_{y=0}^{\infty} \frac{(k^{\ell}
+                (x,y) - m(y))^2}{m(y)} = \sum\limits_{\nu=1}^{\infty}
+                \lambda_\nu^{2\ell} M_\nu^2(x) \frac{(a)_\nu}{(1 +
+                \alpha)^\nu \nu!}.
+            \]
+    \end{enumerate}
+\end{proposition}
+
+\begin{corollary}
+    \label{cor:spectralbounds:cutoff} For \( \alpha = a =1 \), starting
+    at \( n \),
+    \begin{align*}
+        \chi_n^2(\ell) &\le 2^{-2c} \qquad \ell = \log_2(n+1) + c, c>0
+        \\
+        \chi_n^2(\ell) &\ge 2^{2c} \qquad \ell = \log_2(n-1) - c, c>0.
+        \\
+    \end{align*}
+\end{corollary}
+
+\begin{proof}
+    \begin{enumerate}
+        \item
+            From the definitions, for all \( j \) and positive integers \(
+            x \), using the Triangle Inequality
+            \begin{align*}
+                \abs{M_j(x)} &= \abs{ \sum\limits_{\nu=0}^{\min(j,x)} (-1)^\nu
+                \binom{j}{\nu} x(x-1) \cdots (x-\nu+1)} \\
+                &\le \sum\limits_{\nu=0}^j \binom{j}{\nu} x^\nu = (1 + x)^j.
+            \end{align*}
+        \item
+            Thus, for \( \ell \ge \log_2(1 + n) + c \),
+            \begin{multline*}
+                \chi_n^2(\ell) = \sum\limits_{\nu=1}^{\infty} M_\nu^2(n)
+                2^{-\nu(2\ell+1)} \le \sum\limits_{\nu=1}^{\infty} (1 +
+                n)^{2j}2^{-\nu(2\ell+1)} \\
+                \le \frac{(1+n)^2 2^{-(2\ell+1)}}{1 - (1 + n)^2 2^{-(2\ell+1)}}
+                \le \frac{2^{-2c-1}}{1 - 2^{-2c-1}} \le 2^{-2c}.
+            \end{multline*}
+        \item
+            The lower bound follows from using only the lead term,
+            namely
+            \[
+                \chi_n^2(\ell) \ge (1-n)^2 2^{-2\ell} \ge 2^{2c}
+            \] for \( \ell = \log_2(n-1) - c \).
+    \end{enumerate}
+\end{proof}
+
+\subsection*{Birth and Immigration Example}
+
+A simple model of population dynamics with immigration is a Markov
+chain.  For this birth and immigration Markov chain the state space is \(
+\mathcal{X} = \set{0, 1,2, \dots} \).  If the population size at
+generation \( n \) is \( X_n \), then given \( X_n = x \),
+\[
+    X_{n+1} = \sum\limits_{\nu=1}^x N_{\nu,n} + M_{n+1}
+\] where \( N_{\nu,n} \) is the random number of offspring of member \(
+\nu \) of the population at time \( n \).  The offspring random
+variables \( N_ {\nu,n} \) are independent, and identically distributed
+geometric random variables with parameter \( \frac{1}{3} \), that is
+\[
+    \Prob{N_{\nu,n} = j} = \frac{2}{3}\left( \frac{1}{3} \right)^{j}, 0
+    \le j < \infty.
+\] Assume the random variable \( M_{n+1} \) is immigration with the same
+distribution as \( N_{\nu, n} \) and independent of \( N_{\nu, n} \).
+Suppose the population is \( x \).  The sum of \( x + 1 \) independent,
+identically distributed geometric random variables with parameter \( p \)
+being exactly value \( y \) has a negative binomial distribution,
+\[
+    p(x,y) = \binom{x + 1 + y -1}{x}\left( \frac{1}{3} \right)^{x+1}
+    \left( \frac{2}{3} \right)^{y}.
+\] Taking the reference measure as counting measure, and the probability
+measure as \( m(x) = \frac{1}{2^{x+1}} \) the transition probability can
+be written as
+\begin{equation}
+    p(x,y) = \left( \frac{1}{3} \right)^{x+y+1} \binom{x+y}{x}\slash
+    \left( \frac{1}{2} \right)^{x+1}.%
+    \label{eqn:spectralbounds:birthimm}
+\end{equation}
+
+Note that by the symmetry of \( x \) and \( y \) in the transition
+probability kernel, the Markov chain is reversible.  From~\eqref{eqn:spectralbounds:birthimm}
+the eigenvalues are \( \lambda_j = \frac{1}{2^j} \) for \( j = 0,1,2,
+\dots \).  The eigenfunctions are the orthogonal polynomials for the
+measure \( mu(x) = \frac{1}{2^{x+1}} \).  These are the Meixner
+polynomials.
+
+Now applying the spectral representation with Corollary~%
+\ref{cor:spectralbounds:cutoff}, for any starting state \( x \) for all \(
+n \ge 0 \)
+\[
+    \chi^2_x(n) = \sum\limits_{y=0}^{\infty} \frac{(p^n(x,y) - m(y))^2}
+    {m(y)} = \sum\limits_{\nu=1}^{\infty} \lambda_{\nu}^{2n} M_{\nu}^2(x)
+    \frac{1} {2^{\nu}}.
+\] This gives bounds on the convergence.  With the notation of
+Corollary~%
+\ref{cor:spectralbounds:cutoff},
+\begin{align*}
+    \chi^2_x(n) &\le 2^{-2c} \text{ for } n = \log_2(x+1) + c, c >0 \\
+    \chi^2_x(n) &\ge 2^{2c} \text{ for } n= \log_2(x-1) + c, c >0.
+\end{align*}
+The results show the convergence is rapid, only order \( \log_2(x) \)
+steps are necessary and sufficient for convergence to stationarity.
+
+\visual{Section Starter Question}{../../../../CommonInformation/Lessons/question_mark.png}
+\section*{Section Ending Answer}
+
+Label the states conveniently as \( (R, N, S) = (x_1, x_2, x_3) \) so
+the Rain starting state is \( (1,0,0) \).  The transition probability
+matrix is
+\[
+    P = \bordermatrix{ & R & N & S \cr
+    R & 1/2 & 1/4 & 1/4 \cr
+    N & 1/2 & 0 & 1/2 \cr
+    S & 1/4 & 1/4 & 1/2 }.
+\] The eigenvalues of \( P \) are \( 1, 1/4, -1/4 \) with corresponding
+normalized eigenvectors
+\[
+    (1/\sqrt{3}, 1/\sqrt{3}, 1/\sqrt{3}), (1/\sqrt {2}, 0, -1/\sqrt{2}),
+    (1/\sqrt{18}, -4/\sqrt{18}, 1/\sqrt{18}).
+\] Expressing the starting state in terms of the eigenvectors \( (1,0,0)
+= (1/2) \cdot (1,0,-1) + (1/10) \cdot (1, -2, 1) + (2/5) \cdot (1, 1/2,
+1) \).  Then the state at time \( n \) is
+\begin{multline*}
+    (1,0,0)P^n = \\
+    (1/4)^n \cdot (1/2) \cdot (1,0,-1) + (-1/4)^n \cdot (1/10) \cdot (1,
+    -2, 1) + (1)^n \cdot (2/5) \cdot (1, 1/2, 1).
+\end{multline*}
+Then the Euclidean distance from the stationary distribution is
+\begin{multline*}
+    D = \sqrt{ \left[\frac{1}{2} \left(\frac{1}{4} \right)^n \frac{1}{10}
+    + \left(\frac{-1}{4} \right)^n \right]^{2} +\left[\frac{-1}{5} \left
+    (\frac {1}{4} \right)^n \right]^{2} + \left[\frac{-1}{2} \left(\frac
+    {1}{4} \right)^n + \frac{1}{10} \left(\frac{-1}{4} \right)^n \right]^
+    {2} } \\
+    =\sqrt{ \frac{14}{25} \left( \frac{1}{16} \right)^n} = \frac{\sqrt{14}}
+    {5} \left( \frac{1}{4} \right)^{n}.
+\end{multline*}
+
+This example does not fit precisely in the framework of this section
+since the Markov chain is not reversible and \( P \) is not
+self-adjoint.  However, it does illustrate the precise bounds that can
+be achieved if the eigenvalue and eigenvectors are known.
+
+\subsection*{Sources} This section is adapted from:  The Markov Chain
+Monte Carlo Revolution by Persi Diaconis~%
+\cite{diaconis09} and Gibbs Sampling, Exponential Families and
+Orthogonal Polynomials by Diaconis, Khare, and Saloff-Coste~%
+\cite{diaconis08}.
+
+The negative binomial as a continuous mixture of Poisson distributions
+where the mixing distribution of the Poisson rate is a Gamma
+distribution is from \link{https://en.wikipedia.org/wiki/Negative_binomial_distribution\#Gamma
+\_Poisson\_mixture}{Negative\_Binomial\_Distribution}.
+
+The definition of the regular hypergeometric function as a Gauss series
+is from the Digital Library of Mathematical Functions, Section 15.2,
+\link{https://dlmf.nist.gov/15.2\#i}{Digital Library of Mathematical
+Functions, Gauss Series}
+
+Information about the Meixner polynomials is from Chihara
+\cite{chihara78}.
+
+\hr
+
+\visual{Algorithms, Scripts, Simulations}{../../../../CommonInformation/Lessons/computer.png}
+\section*{Algorithms, Scripts, Simulations}
+
+\subsection*{Algorithm}
+
+\begin{algorithm}
+  \DontPrintSemicolon
+  \KwData{Size of binomial, length of the \(x\)-chain, starting value
+    for the \(x\)-chain, number of trials}
+  \KwResult{Plots of Gibbs sampler results, total variation distance to
+    uniform}
+
+  \SetKwProg{Fn}{function}{}{}
+  \SetKwFunction{xChain}{xChain}
+
+  \Fn{xchain(x, n)}{ one step of the \(x\) by selecting \( \theta \)
+    from Beta distribution, then \(x\) from Binomial}
+  Set size of binomial \(n\), length of the \(x\)-chain \( L \),
+  starting value \(x_0\) for the \(x\)-chain, number of trials \(r\)\;
+  Set recording period and determine number of records\;
+  Initialize records of the \(x\)-chain and total variation distance\;
+  \For{\( x \leftarrow 1:r \)} {
+    \For{\( i \leftarrow 1:L \)} {
+      \( x_0 \leftarrow \xChain(x_0, n) \)\;
+      Record \(x_0 \) at recording periods\;
+    }
+  }
+
+  Compute total distribution distance to uniform at recording periods\;
+  Plot histogram and QQ plot of results\;
+\end{algorithm}
+
+\begin{algorithm}
+  \DontPrintSemicolon
+  \KwData{Size of binomial}
+  \KwResult{Comparison of computed eigenvalues with theoretical eigenvalues}
+
+  \SetKwProg{Fn}{function}{}{}
+  \SetKwFunction{Pxxp}{Pxxp}
+  \SetKwFunction{lambda}{lambda}
+  
+  Set size of binomial \( n \)\;
+  Fill transition probability matrix with \Pxxp
+  Compute eigenvalue, in decreasing order\;
+  Compute theoretical eigenvalues, in decreasing order\;
+
+  Summarize difference of computed and theoretical eigenvalues\;
+\end{algorithm}
+
+\subsection*{Scripts}
+
+\input{spectralbounds_scripts}
+
+\hr
+
+\visual{Problems to Work}{../../../../CommonInformation/Lessons/solveproblems.png}
+\section*{Problems to Work for Understanding}
+
+\renewcommand{\theexerciseseries}{}
+\renewcommand{\theexercise}{\arabic{exercise}}
+
+\begin{exercise}
+    Show
+    \[
+        m(x) = \int\limits_0^{\infty} \frac{\EulerE^{-\theta} \theta^x}{x!}
+        \EulerE^{-\theta} \df{\theta} = \int\limits_0^{\infty} \frac{\EulerE^
+        {-2\theta} \theta^x}{x!} \df{\theta} = \frac{1}{2^{x+1}}.
+    \]
+\end{exercise}
+\begin{solution}
+    \begin{align*}
+        \int\limits_0^{\infty} \frac{\EulerE^{-\theta} \theta^x}{x!}
+        \EulerE^{-\theta} \df{\theta} &= \frac{1}{x!} \int\limits_0^{\infty}
+        \EulerE^{-2\theta} \theta^x \df{\theta} \\
+        &= \frac{1}{x!} \cdot \frac{1}{2^{x+1}}\int\limits_0^{\infty}
+        \EulerE^{-2\theta} (2\theta)^x \df{(2\theta)} \\
+        &= \frac{1}{x!} \cdot \frac{1}{2^{x+1}} \cdot x!
+    \end{align*}
+    where the last equality is the factorial property of the Gamma
+    integral.
+\end{solution}
+
+\begin{exercise}
+    Show
+    \[
+        \int\limits_0^{\infty}\frac{2^{x+1} \theta^{x+x'} \EulerE^{-3\theta}}
+        {x!x'!} \df{\theta} = \frac{2^{x+1}}{3^{x+x'+1}} \binom{x+x'}{x},
+        \quad x,x' \in \set{0,1,2,3,\dots}.
+    \]
+\end{exercise}
+\begin{solution}
+    \begin{multline*}
+        \int\limits_0^{\infty}\frac{2^{x+1} \theta^{x+x'} \EulerE^{-3\theta}}
+        {x!x'!} \df{\theta} = \frac{2^{x+1}}{x!  x'!} \int\limits_0^{\infty}
+        \theta^{x+x'} \EulerE^{-3\theta} \df{\theta} \\
+        = \frac{2^{x+1}}{3^{x+x'+1} x!  x'!} \int\limits_0^{\infty} (3\theta)^
+        {x+x'} \EulerE^{-3\theta} \df{(3\theta)} = \frac{2^{x+1}}{3^{x+x'+1}
+        x!  x'!} (x + x')!  \\
+        = \frac{2^{x+1}}{3^{x+x'+1}} \binom{x+x'}{x}.
+    \end{multline*}
+\end{solution}
+
+\begin{exercise}
+    Show
+    \[
+        \frac{(a)_x}{x!}\left( \frac{1}{\alpha+1} \right)^a \left( \frac
+        {\alpha}{\alpha+1} \right)^x
+    \] is a probability mass function for \( x = 0,1,2,3,\dots \).
+\end{exercise}
+\begin{solution}
+    \begin{align*}
+        &\left( \frac{1}{1+\alpha} \right)^a \sum\limits_{x=0}^{\infty}
+        \frac{(a)_x}{x!} \left( \frac{\alpha}{\alpha+1} \right)^x \\
+        &= \left( \frac{1}{1+\alpha} \right)^a \left[ 1 + \frac{a}{1!}
+        \left( \frac{\alpha}{\alpha+1} \right) + \frac{a(a+1)}{2!} \left
+        ( \frac{\alpha}{\alpha+1} \right)^2 + \cdots \right] \\
+        &= \left( \frac{1}{1+\alpha} \right)^a \left[ 1 - \frac{-a}{1!}
+        \left( \frac{\alpha}{\alpha+1} \right) + \frac{-a(-a-1)}{2!}
+        \left( \frac{\alpha}{\alpha+1} \right)^2 + \cdots \right] \\
+        &= \left( \frac{1}{1+\alpha} \right)^a \left[ 1 - \frac{\alpha}{\alpha+1}
+        \right]^{-a} = 1
+    \end{align*}
+    where the next-to-last equality is from the general Binomial
+    Expansion or equivalently the Taylor expansion of \( (1 + z)^{-a} \).
+\end{solution}
+
+\begin{exercise}
+    Show
+    \begin{multline*}
+        k(x,y) = \int_0^{\infty} \frac{\EulerE^{-\lambda(\alpha+1)/\alpha}
+        \lambda^{a+x-1}}{\Gamma(a + x)(\alpha/(\alpha+1))^{a+x}} \cdot
+        \frac{\EulerE^{-\lambda} \lambda^y}{y!} \df{\lambda} \\
+        = \frac{\Gamma(a+x+y)(\alpha/(2\alpha+1))^{a+x+y}}{\Gamma(a+x) (\alpha/
+        (\alpha+1))^{a+x}y!}.
+    \end{multline*}
+\end{exercise}
+\begin{solution}
+    Move terms in the denominator not depending on \( \lambda \) out of
+    the integral and combine like terms in the numerator.
+    \begin{multline*}
+        k(x,y) = \int_0^{\infty} \frac{\EulerE^{-\lambda(\alpha+1)/\alpha}
+        \lambda^{a+x-1}}{\Gamma(a + x)(\alpha/(\alpha+1))^{a+x}} \cdot
+        \frac{\EulerE^{-\lambda} \lambda^y}{y!} \df{\lambda} \\
+        = \frac{1}{\Gamma(a + x)(\alpha/(\alpha+1))^{a+x} y!} \int_0^{\infty}
+        \EulerE^{-\lambda((\alpha+1)/\alpha + 1)} \lambda^{a+x+y-1} \df{\lambda}.
+    \end{multline*}
+    Let \( z = \frac{2\alpha+1}{\alpha} \lambda \), so \( \df{\lambda} =
+    \frac{\alpha}{2\alpha+1} \df{z} \).  Then the integral becomes
+    \begin{multline*}
+        \int_0^{\infty} \EulerE^{-\lambda((\alpha+1)/\alpha + 1)}
+        \lambda^ {a+x+y-1} \df{\lambda} \\
+        = \int\limits_0^{\infty}\EulerE^{-z} z^{a + x + y -1} \left(
+        \frac{\alpha}{2\alpha+1} \right)^{a + x +y} \df{z} \\
+        = \Gamma(a + x + y) \left( \frac{\alpha}{2\alpha+1} \right)^{a +
+        x +y}.
+    \end{multline*}
+\end{solution}
+\begin{exercise}
+    Show the first three Meixner polynomials are
+    \begin{align*}
+        M_0(x; a,\alpha) &= 1, \\
+        M_1(x; a,\alpha) &= 1 - \frac{\alpha}{a}x = \frac{a - \alpha x}{a},\\
+        M_2(x; a,\alpha) &= 1 - \frac{2\alpha}{a}x + \frac{\alpha^2}{a(a+1)}x
+        (x+1),
+    \end{align*}
+\end{exercise}
+\begin{solution}
+    Use the definition of the Meixner polynomial
+    \[
+        M_j(x; a, \alpha) = {}_2F_1 \left( -j, -x; a; -\alpha \right)
+    \] in terms of the Gauss series for the regular hypergeometric
+    function with \( a = -j \), \( b = -x \), \( c = a \) and \( z = -\alpha
+    \).  For negative integer values of \( a \) the Gauss series
+    terminates as a degree \( j \) polynomial.  Then directly \( M_0(x)
+    = 1 \), and \( M_1(x) = 1 + \frac{(-1)(-x)(-\alpha)}{1!  \cdot a} =
+    1 - \frac{\alpha}{a} x \) and \( M_2(x) = 1 + \frac{(-1)(-x)(-\alpha)}
+    {1!  \cdot a} + \frac{(-2)(-1) \cdot (-x)(-x+1) \alpha^2}{2!  \cdot
+    a(a+1)} = 1 - \frac{\alpha (\alpha + a + 1)}{a (a+1)} x+ \frac{\alpha^2}
+    {a(a+1)} x^{2} \).
+\end{solution}
+
+\begin{exercise}
+    Verify the orthogonality relation for the Meixner polynomials
+    \[
+        \sum\limits_{x=0}^{\infty} M_j(x) M_k(x) m(x) = \frac{(1+\alpha)^j
+        j!}{(a)_j} \delta_{jk}
+    \] for \( j = k = 0 \); \( j = 0 \), \( k=1 \); and \( j = k = 1 \).
+\end{exercise}
+\begin{solution}
+    For \( j = k = 0 \),
+    \[
+        \sum\limits_{x=0}^{\infty} M_0(x) M_0(x) m(x) = \sum\limits_{x=0}^
+        {\infty} m(x) = 1
+    \] because \( m(x) \), the negative binomial distribution, is a
+    probability distribution.  This matches the given
+    \[
+        \frac{(1+\alpha)^0 0!}{(a)_0} \delta_{00} = 1.
+    \]
+
+    For \( j = 0 \) and \( k = 1 \)
+    \begin{multline*}
+        \sum\limits_{x=0}^{\infty} M_0(x) M_1(x) m(x) = \sum\limits_{x=0}^
+        {\infty} M_1(x) m(x) = \sum\limits_{x=0}^{\infty} \left( 1 -
+        \frac{\alpha}{a}x \right) m(x)\\
+        = \sum\limits_{x=0}^{\infty} m(x) - \frac{\alpha}{a} \sum\limits_
+        {x=0}^{\infty} x m(x) = 1 - \frac{\alpha}{a} \cdot a \cdot \frac
+        {\alpha}{\alpha+1} \cdot \frac{1}{1/\alpha+1} = 1 - \frac{\alpha^2}
+        {(\alpha+1)^2}
+    \end{multline*}
+    by using the mean of the negative binomial distribution.
+
+    For \( j = k = 1 \)
+    \begin{align*}
+        &\sum\limits_{x=0}^{\infty} M_1(x) M_1(x) m(x) \\
+        & = \sum\limits_{x=0}^{\infty} \left( 1 - \frac{\alpha}{a}x
+        \right)^2 m(x)\\
+        & = \sum\limits_{x=0}^{\infty} m(x) - 2\frac{\alpha}{a} \sum\limits_
+        {x=0}^{\infty} x m(x) + \frac{\alpha^2}{a^2} \sum\limits_{x=0}^{\infty}
+        x^2 m(x)\\
+        & = 1 - 2\frac{\alpha}{a} \cdot a \cdot \frac{\alpha}{\alpha+1}
+        \cdot \frac{1}{1/\alpha+1} + \frac{\alpha^2}{a^2} a \cdot \frac{\alpha}
+        {\alpha+1} \cdot \frac{1}{(1/\alpha+1)^2} & = 1 - 2 \alpha^2 +
+        \frac{\alpha^3(\alpha+1)}{\alpha}
+    \end{align*}
+    by using the mean and variance of the negative binomial
+    distribution.
+
+\end{solution}
+
+\begin{exercise}
+    Using Meixner's generating function
+    \[
+        G(x,w) =\left( 1 - \frac{w}{c} \right)^x \left( 1-w \right)^{-x-\beta}
+    \] with \( 0 < \abs{c} < 1 \) and \( \beta \ne 0, -1, -2, \dots \),
+    verify the orthogonality condition for the normalized Meixner
+    polynomials
+    \[
+        \sum_{x=0}^{\infty} m_j(x; \beta, c) m_k(x; \beta, c) \frac{(\beta)_x}
+        {x!} c^x \left(1-c \right)^\beta = c^{-j} j!  (\beta)_j \delta_{jk}.
+    \]
+\end{exercise}
+\begin{solution}
+    Follow
+    \cite[pages 4 and 176]{chihara78}.
+
+    The generating function definition of the Meixner polynomials \( m_n
+    (x,\beta,c) \) is
+    \[
+        \left( 1 - \frac{w}{c} \right)^x \left( 1-w \right)^{-x-\beta} =
+        \sum_{\nu=0}^{\infty} m_{\nu}(x;\beta,c) \frac{w^n}{n!}
+    \] The binomial expansion for the first factor in \( G(x,w) \) is \(
+    \left( 1 - \frac{w}{c} \right)^x \) is
+    \[
+        \left( 1 - \frac{w}{c} \right)^x = \sum_{\nu=0}^{\infty} (-1)^{\nu}
+        \binom{x}{k} \frac{w^\nu}{c^{\nu}} = \sum_{\nu=0}^{\infty}
+        \frac{(x)_n}{k!} \frac{w^\nu}{c^{\nu}}
+    \] where \( (x)_n \) is the falling Pochhammer symbol or falling
+    factorial \( x(x-1)(x-2)\cdots(x-(n-1)) \).
+
+    The binomial expansion for the second factor in \( G(x,w) \)is
+    \[
+        \left( 1-w \right)^{-x-\beta} = \sum_{\nu=0}^{\infty} (-1)^{\nu}\binom
+        {-x-\beta}{k} w^\nu.
+    \]
+
+    Then multiplying the two expansions, collecting terms in powers of \(
+    w \) gives for the coefficient \( n \)
+    \[
+        m_n(x,\beta,c) = (-1)^n n!  \sum_{\nu=0}^n \binom{x}{\nu} \binom
+        {-x-\beta}{n-\nu} c^{-\nu}.
+    \] The factor \( n! \) results from ``multiply in \( n! \) and
+    divide out \( n! \)'' to introduce the \( n! \) in denominator of
+    the definition which was not originally present in the binomial
+    expansions.  The \( (-1)^n \) results from the \( (-1)^\nu \) from
+    the first factor binomial expansion and the \( (-1)^{n-\nu} \) from
+    the second factor binomial expansion.  The \( c^{-\nu} \) comes from
+    the denominator in the expansion of the first term.
+
+    Since \( \binom{x}{\nu} = \frac{1}{\nu!} x(x-1)\cdots(x-\nu+1) \)
+    has degree \( \nu \) and \( \binom{-x-\beta}{n-\nu} = \frac{1}{(n-\nu)!}
+    (-x-\beta)(-x-\beta-1)\cdots(-x-\beta-(n-\nu-1)) \) has degree \( n-\nu
+    \), \( m_n(x,\beta,c) \) is a polynomial of degree \( n \).
+
+    Now an identity in the parameters of the Meixner polynomials
+    \begin{align*}
+        m_n(-x-\beta; \beta, c_{-1}) &= (-1)^n n!  \sum_{\nu=0}^n \binom
+        {-x-\beta}{\nu} \binom{-(x-\beta)-\beta}{n-\nu} (c^{-1})^{-\nu}
+        \\
+        &= (-1)^n n!  \sum_{\nu=0}^n \binom{-x-\beta}{\nu} \binom{x}{n-\nu}
+        c^\nu \\
+        &= c^{n} (-1)^n n!  \sum_{\nu=0}^n \binom{-x-\beta}{\nu} \binom{x}
+        {n-\nu} c^(\nu-n) \\
+        &= c^{n} (-1)^n n!  \sum_{\nu_1=0}^n \binom{-x-\beta}{n-\nu_1}
+        \binom{x}{\nu_1} c^(\nu_1) \\
+        &= c^n m_n(x;\beta,c).
+    \end{align*}
+
+\end{solution}
+
+\hr
+
+\visual{Books}{../../../../CommonInformation/Lessons/books.png}
+\section*{Reading Suggestion:}
+
+\bibliography{../../../../CommonInformation/bibliography}
+
+%   \begin{enumerate}
+%     \item
+%     \item
+%     \item
+%   \end{enumerate}
+
+\hr
+
+\visual{Links}{../../../../CommonInformation/Lessons/chainlink.png}
+\section*{Outside Readings and Links:}
+\begin{enumerate}
+    \item
+    \item
+    \item
+    \item
+\end{enumerate}
+
+\hr
+
+\section*{\solutionsname} \loadSolutions
+
+\mydisclaim \myfooter
+
+Last modified:  \flastmod
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
